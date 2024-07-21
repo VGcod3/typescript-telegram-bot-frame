@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "start": "node bot.ts",
-    "dev": "nodemon bot.ts"
+    "start": "node index.ts",
+    "dev": "nodemon index.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.9.1",

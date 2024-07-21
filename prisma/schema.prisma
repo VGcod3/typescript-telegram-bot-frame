@@ -15,7 +15,10 @@ datasource db {
 
 model User {
   id         String @id @default(auto()) @map("_id") @db.ObjectId
-  telegramId Int @unique
+  userId     Int    @unique @map("userId")
+  data      Json  @default("{}") @map("sessionData")
+
+  currentScene String @default("home")
 
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @default(now()) @updatedAt
