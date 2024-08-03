@@ -3,19 +3,28 @@ import { UserDb } from "../../db.utils/user.utils";
 import { SceneNavigator } from "../../../SceneNavigator";
 import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
+import {
+  SessionStorageType,
+  UserSessionStorage,
+} from "../../../SessionsStorage";
 
 export class HomeService {
-  constructor(
-    private readonly UserDb: UserDb,
-    private readonly sender: Sender,
-    private readonly sceneNavigator: SceneNavigator,
-    private readonly sessionManager: SessionManager
-  ) {
-    this.UserDb = UserDb;
-    this.sender = sender;
+  private readonly UserDb: UserDb;
+  private readonly sender: Sender;
+  private readonly sceneNavigator: SceneNavigator;
+  private readonly sessionManager: SessionManager;
+  private readonly sessions: SessionStorageType;
 
-    this.sceneNavigator = sceneNavigator;
-    this.sessionManager = sessionManager;
+  constructor() {
+    this.UserDb = new UserDb();
+    this.sender = new Sender();
+    this.sessions = UserSessionStorage.getInstance();
+
+    this.sessionManager = new SessionManager(this.sessions);
+    this.sceneNavigator = new SceneNavigator(
+      this.sessions,
+      this.sessionManager
+    );
   }
 
   async handleStart(message: MessageType) {

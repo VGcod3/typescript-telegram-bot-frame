@@ -33,7 +33,7 @@ export class SessionManager {
 
   public async initSession(chatId: number) {
     const sessionData = {
-      currentScene: SceneEnum.Home,
+      currentScene: SceneEnum.Posting,
       data: {},
     };
 

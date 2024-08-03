@@ -20,6 +20,7 @@ model User {
 
   currentScene String @default("home")
 
+
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @default(now()) @updatedAt
   TeamMember TeamMember?

@@ -1,12 +1,7 @@
 import { UserSession } from ".";
-import { allScenes, SceneEnum } from "./scenesList";
+import { BotInstance } from "./BotInstance";
+import { AllScenes, iScene, SceneEnum } from "./scenesList";
 import { SessionManager } from "./SessionManager";
-
-export interface iScene {
-  name: SceneEnum;
-  nextScenes: SceneEnum[] | null;
-  prevScene: SceneEnum | null;
-}
 
 export class SceneNavigator {
   private readonly scenes: Map<string, iScene>;
@@ -15,6 +10,8 @@ export class SceneNavigator {
     private readonly sessions: Map<number, UserSession>,
     private readonly sessionManager: SessionManager
   ) {
+    const allScenes = new AllScenes().allScenes;
+
     this.scenes = new Map(allScenes.map((scene) => [scene.name, scene]));
 
     this.sessionManager = sessionManager;
@@ -36,6 +33,7 @@ export class SceneNavigator {
     };
 
     this.sessions.set(chatId, sessionData);
+    this.enterModuleScene(chatId);
     this.sessionManager.pushSessionData(chatId, sessionData);
   }
 
@@ -51,13 +49,10 @@ export class SceneNavigator {
 
     const currentScene = this.getScene(session.currentScene);
 
-    if (currentScene.prevScene) {
-      const sessionData = {
-        ...session,
-        currentScene: currentScene.prevScene,
-      };
-      this.sessions.set(chatId, sessionData);
-      this.sessionManager.pushSessionData(chatId, sessionData);
+    const prevScene = currentScene.prevScene;
+
+    if (prevScene) {
+      this.setScene(chatId, prevScene);
     }
   }
 
@@ -95,5 +90,19 @@ export class SceneNavigator {
     }
 
     return this.getScene(session.currentScene);
+  }
+
+  private async enterModuleScene(chatId: number) {
+    const currentScene = await this.getCurrentScene(chatId);
+
+    const bot = BotInstance.getInstance();
+
+    bot.removeAllListeners();
+
+    currentScene.enter();
+
+    // new sceneModule(this.sessions);
+
+    // console.log(sceneModule);
   }
 }

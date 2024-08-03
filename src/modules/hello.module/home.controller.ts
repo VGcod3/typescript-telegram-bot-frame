@@ -6,8 +6,8 @@ import { MessageType } from "../sender";
 export class HomeController {
   private readonly bot: TelegramBot;
 
-  constructor(private readonly helloService: HomeService) {
-    this.helloService = helloService;
+  constructor(private readonly homeService: HomeService) {
+    this.homeService = homeService;
 
     this.bot = BotInstance.getInstance();
 
@@ -18,12 +18,12 @@ export class HomeController {
 
   public async handleTextMessage(message: MessageType) {
     if (message.text === "/start") {
-      this.helloService.handleStart(message);
+      this.homeService.handleStart(message);
     } else {
-      this.helloService.handleKeyboard(message);
+      this.homeService.handleKeyboard(message);
 
       if (message.text === "/users") {
-        this.helloService.handleUsers(message);
+        this.homeService.handleUsers(message);
       }
     }
   }
