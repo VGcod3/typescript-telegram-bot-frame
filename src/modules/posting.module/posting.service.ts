@@ -36,14 +36,9 @@ export class PostingService {
     const availableSceneNames =
       await this.sceneNavigator.getAvailableNextScenes(chatId);
 
-    const enumValues = Object.values(SceneEnum);
-
     if (message.text === "Back") {
       this.sceneNavigator.goBack(chatId);
-    } else if (
-      enumValues.includes(message.text as SceneEnum) &&
-      availableSceneNames.includes(message.text as SceneEnum)
-    ) {
+    } else if (availableSceneNames.includes(message.text as SceneEnum)) {
       this.sceneNavigator.setScene(chatId, message.text as SceneEnum);
     } else {
       await this.sender.sendText(chatId, "Invalid option");

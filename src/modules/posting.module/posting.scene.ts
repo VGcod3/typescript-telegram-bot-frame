@@ -1,6 +1,5 @@
 import { SceneNavigator } from "../../../SceneNavigator";
 import { SessionManager } from "../../../SessionManager";
-import { UserSessionStorage } from "../../../SessionsStorage";
 import { UserDb } from "../../db.utils/user.utils";
 import { Sender } from "../sender";
 import { PostingController } from "./posting.controller";
@@ -12,9 +11,9 @@ export class PostingScene {
 
     const userDb = new UserDb();
     const sender = new Sender();
-    const sessions = UserSessionStorage.getInstance();
-    const sessionManager = new SessionManager(sessions);
-    const sceneNavigator = new SceneNavigator(sessions, sessionManager);
+
+    const sessionManager = new SessionManager(userDb);
+    const sceneNavigator = new SceneNavigator(sessionManager);
 
     const postingService = new PostingService(
       userDb,

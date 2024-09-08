@@ -1,20 +1,18 @@
-import { UserSession } from ".";
 import { BotInstance } from "./BotInstance";
 import { AllScenes, iScene, SceneEnum } from "./scenesList";
-import { SessionManager } from "./SessionManager";
+import { SessionManager, UserSession } from "./SessionManager";
 
 export class SceneNavigator {
   private readonly scenes: Map<string, iScene>;
+  private readonly sessions: Map<number, UserSession>;
 
-  constructor(
-    private readonly sessions: Map<number, UserSession>,
-    private readonly sessionManager: SessionManager
-  ) {
+  constructor(private readonly sessionManager: SessionManager) {
     const allScenes = new AllScenes().allScenes;
 
-    this.scenes = new Map(allScenes.map((scene) => [scene.name, scene]));
-
     this.sessionManager = sessionManager;
+    this.sessions = sessionManager.sessions;
+
+    this.scenes = new Map(allScenes.map((scene) => [scene.name, scene]));
   }
 
   public async setScene(chatId: number, sceneName: SceneEnum): Promise<void> {

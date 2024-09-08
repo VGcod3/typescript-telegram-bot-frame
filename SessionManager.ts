@@ -1,13 +1,18 @@
-import { UserSession } from ".";
 import { SceneEnum } from "./scenesList";
+import { SessionStorageType, UserSessionStorage } from "./SessionsStorage";
 import { UserDb } from "./src/db.utils/user.utils";
 
-export class SessionManager {
-  private readonly userDb: UserDb;
+export interface UserSession {
+  currentScene: SceneEnum;
+  data: any;
+}
 
-  constructor(private readonly sessions: Map<number, UserSession>) {
-    this.userDb = new UserDb();
-    this.sessions = sessions;
+export class SessionManager {
+  public readonly sessions: SessionStorageType;
+
+  constructor(private readonly userDb: UserDb) {
+    this.userDb = userDb;
+    this.sessions = UserSessionStorage.getInstance(this.userDb);
   }
 
   public async pushSessionData(chatId: number, data: any) {

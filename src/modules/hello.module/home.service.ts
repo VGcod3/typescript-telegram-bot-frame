@@ -3,28 +3,19 @@ import { UserDb } from "../../db.utils/user.utils";
 import { SceneNavigator } from "../../../SceneNavigator";
 import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
-import {
-  SessionStorageType,
-  UserSessionStorage,
-} from "../../../SessionsStorage";
 
 export class HomeService {
   private readonly UserDb: UserDb;
   private readonly sender: Sender;
   private readonly sceneNavigator: SceneNavigator;
   private readonly sessionManager: SessionManager;
-  private readonly sessions: SessionStorageType;
 
   constructor() {
     this.UserDb = new UserDb();
     this.sender = new Sender();
-    this.sessions = UserSessionStorage.getInstance();
 
-    this.sessionManager = new SessionManager(this.sessions);
-    this.sceneNavigator = new SceneNavigator(
-      this.sessions,
-      this.sessionManager
-    );
+    this.sessionManager = new SessionManager(this.UserDb);
+    this.sceneNavigator = new SceneNavigator(this.sessionManager);
   }
 
   async handleStart(message: MessageType) {
@@ -50,14 +41,9 @@ export class HomeService {
     const availableSceneNames =
       await this.sceneNavigator.getAvailableNextScenes(chatId);
 
-    const enumValues = Object.values(SceneEnum);
-
     if (message.text === "Back") {
       this.sceneNavigator.goBack(chatId);
-    } else if (
-      enumValues.includes(message.text as SceneEnum) &&
-      availableSceneNames.includes(message.text as SceneEnum)
-    ) {
+    } else if (availableSceneNames.includes(message.text as SceneEnum)) {
       this.sceneNavigator.setScene(chatId, message.text as SceneEnum);
     } else {
       await this.sender.sendText(chatId, "Invalid option");
