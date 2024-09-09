@@ -38,7 +38,7 @@ export class SessionManager {
 
   public async initSession(chatId: number) {
     const sessionData = {
-      currentScene: SceneEnum.Posting,
+      currentScene: SceneEnum.Home,
       data: {},
     };
 
