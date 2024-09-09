@@ -1,6 +1,7 @@
 import { SceneEnum } from "./scenesList";
 import { SessionStorageType, UserSessionStorage } from "./SessionsStorage";
 import { UserDb } from "./src/db.utils/user.utils";
+import { RegistrationSteps } from "./src/modules/registration.module/registration.service";
 
 export interface UserSession {
   currentScene: SceneEnum;
@@ -24,7 +25,13 @@ export class SessionManager {
 
     this.userDb.updateUser(chatId, data);
   }
+  public updateRegistrationStep(chatId: number, step: RegistrationSteps) {
+    const session = this.sessions.get(chatId)!;
 
+    session.data.RegistrationStep = step;
+
+    this.sessions.set(chatId, session);
+  }
   public async loadSessionsFromDb() {
     const users = await this.userDb.getAllUsers();
 
@@ -39,11 +46,17 @@ export class SessionManager {
   public async initSession(chatId: number) {
     const sessionData = {
       currentScene: SceneEnum.Home,
-      data: {},
+      data: {
+        registrationStep: RegistrationSteps.START
+      },
     };
 
     this.sessions.set(chatId, sessionData);
 
     await this.pushSessionData(chatId, sessionData);
+  }
+
+  public async getSession(chatId: number) {
+    return this.sessions.get(chatId)!;
   }
 }

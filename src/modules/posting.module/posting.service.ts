@@ -36,7 +36,7 @@ export class PostingService {
     const availableSceneNames =
       await this.sceneNavigator.getAvailableNextScenes(chatId);
 
-    if (message.text === "Back") {
+    if (message.text === "Назад") {
       this.sceneNavigator.goBack(chatId);
     } else if (availableSceneNames.includes(message.text as SceneEnum)) {
       this.sceneNavigator.setScene(chatId, message.text as SceneEnum);
@@ -58,7 +58,7 @@ export class PostingService {
     await this.sender.sendKeyboard(chatId, "Choose an option", [
       availableScenesNames.map((scene) => ({ text: scene })),
 
-      canGoBack ? [{ text: "Back" }] : [],
+      canGoBack ? [{ text: "Назад" }] : [],
     ]);
   }
 }

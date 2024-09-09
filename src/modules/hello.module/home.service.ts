@@ -26,7 +26,7 @@ export class HomeService {
     const user = await this.UserDb.getUser(chatId);
 
     if (user) {
-      await this.sender.sendText(chatId, "Welcome back!");
+      await this.sender.sendText(chatId, "Welcome Back!");
     } else {
       await this.UserDb.createUser(chatId);
       await this.sender.sendText(chatId, "Welcome, nice to see you!");
@@ -41,7 +41,7 @@ export class HomeService {
     const availableSceneNames =
       await this.sceneNavigator.getAvailableNextScenes(chatId);
 
-    if (message.text === "Back") {
+    if (message.text === "Назад") {
       this.sceneNavigator.goBack(chatId);
     } else if (availableSceneNames.includes(message.text as SceneEnum)) {
       this.sceneNavigator.setScene(chatId, message.text as SceneEnum);
@@ -75,7 +75,7 @@ export class HomeService {
     await this.sender.sendKeyboard(chatId, "Choose an option", [
       availableScenesNames.map((scene) => ({ text: scene })),
 
-      canGoBack ? [{ text: "Back" }] : [],
+      canGoBack ? [{ text: "Назад" }] : [],
     ]);
   }
 }

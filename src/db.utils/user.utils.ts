@@ -1,5 +1,9 @@
+import { RegistrationSteps } from "../modules/registration.module/registration.service";
 import { prisma } from "./prisma.client";
 
+export interface IUserData {
+  registrationStep: RegistrationSteps;
+}
 export class UserDb {
   async createUser(userId: number) {
     return await prisma.user.create({
@@ -22,7 +26,7 @@ export class UserDb {
       where: {
         userId,
       },
-      data,
+      data
     });
   }
 
