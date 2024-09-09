@@ -29,4 +29,13 @@ export class UserDb {
   async getAllUsers() {
     return await prisma.user.findMany();
   }
+  async createTeamMember(userId: number, data: any) {
+
+    return await prisma.teamMember.create({
+      data: {
+        ...data,
+        userId: userId.toString(),
+      }
+    })
+  }
 }
