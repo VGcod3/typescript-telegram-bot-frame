@@ -43,7 +43,7 @@ export class RegistrationService {
         } else if (availableSceneNames.includes(message.text as SceneEnum)) {
             this.sceneNavigator.setScene(chatId, message.text as SceneEnum);
         } else {
-            await this.sender.sendText(chatId, "Invalid option");
+            await this.sender.sendText(chatId, "Такого варіанту не існує");
         }
 
         await this.sendLocalStageKeyboard(chatId);
@@ -55,7 +55,7 @@ export class RegistrationService {
 
     async getUserStep(chatId: number): Promise<RegistrationSteps> {
         const userSession = await this.sessionManager.getSession(chatId);
-        if (!userSession.data.RegistrationStep ) {
+        if (!userSession.data.RegistrationStep) {
             await this.setUserStep(chatId, RegistrationSteps.START);
         }
         return userSession.data.RegistrationStep;
@@ -69,7 +69,7 @@ export class RegistrationService {
 
         const canGoBack = !!currentScene.prevScene;
 
-        await this.sender.sendKeyboard(chatId, "Choose an option", [
+        await this.sender.sendKeyboard(chatId, "Виберіть дію", [
             availableScenesNames.map((scene) => ({ text: scene })),
 
             canGoBack ? [{ text: "Back" }] : [],

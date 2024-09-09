@@ -41,7 +41,7 @@ export class PostingService {
     } else if (availableSceneNames.includes(message.text as SceneEnum)) {
       this.sceneNavigator.setScene(chatId, message.text as SceneEnum);
     } else {
-      await this.sender.sendText(chatId, "Invalid option");
+      await this.sender.sendText(chatId, "Такого варіанту не існує");
     }
 
     await this.sendLocalStageKeyboard(chatId);
@@ -55,7 +55,7 @@ export class PostingService {
 
     const canGoBack = !!currentScene.prevScene;
 
-    await this.sender.sendKeyboard(chatId, "Choose an option", [
+    await this.sender.sendKeyboard(chatId, "Виберіть дію", [
       availableScenesNames.map((scene) => ({ text: scene })),
 
       canGoBack ? [{ text: "Назад" }] : [],

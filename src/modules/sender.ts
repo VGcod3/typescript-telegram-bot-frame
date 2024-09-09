@@ -20,6 +20,7 @@ export class Sender {
     await this.bot.sendMessage({
       chat_id: chatId,
       text,
+      parse_mode: "HTML",
     });
   }
 

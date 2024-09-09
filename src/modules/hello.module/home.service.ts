@@ -3,7 +3,15 @@ import { UserDb } from "../../db.utils/user.utils";
 import { SceneNavigator } from "../../../SceneNavigator";
 import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
-
+export const startMessage = `
+<b>Цей бот допоможе тобі:</b>
+- Зареєструватися на BEST CTF
+- Розпочати тестове завдання
+- Знайти необхідну інформацію про CTF, такі як розклад, правила
+- Отримувати сповіщення від організаторів у реальному часі
+- Створювати та приєднувати людей до своєї команди
+- Визначити чи ти 0 чи 1
+`;
 export class HomeService {
   private readonly UserDb: UserDb;
   private readonly sender: Sender;
@@ -26,10 +34,12 @@ export class HomeService {
     const user = await this.UserDb.getUser(chatId);
 
     if (user) {
-      await this.sender.sendText(chatId, "Welcome Back!");
+      await this.sender.sendText(chatId, "Радий знову тебе бачити!" + startMessage);
+
+
     } else {
       await this.UserDb.createUser(chatId);
-      await this.sender.sendText(chatId, "Welcome, nice to see you!");
+      await this.sender.sendText(chatId, "Ласкаво просимо, студенте!" + startMessage);
     }
 
     await this.sendLocalStageKeyboard(chatId);
@@ -46,7 +56,7 @@ export class HomeService {
     } else if (availableSceneNames.includes(message.text as SceneEnum)) {
       this.sceneNavigator.setScene(chatId, message.text as SceneEnum);
     } else {
-      await this.sender.sendText(chatId, "Invalid option");
+      await this.sender.sendText(chatId, "Такого варіанту не існує");
     }
 
     await this.sendLocalStageKeyboard(chatId);
@@ -72,7 +82,7 @@ export class HomeService {
 
     const canGoBack = !!currentScene.prevScene;
 
-    await this.sender.sendKeyboard(chatId, "Choose an option", [
+    await this.sender.sendKeyboard(chatId, "Виберіть дію", [
       availableScenesNames.map((scene) => ({ text: scene })),
 
       canGoBack ? [{ text: "Назад" }] : [],
