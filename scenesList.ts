@@ -5,8 +5,7 @@ import { RegistrationScene } from "./src/modules/registration.module/registratio
 export enum SceneEnum {
   Home = "home",
   Registration = "Реєстрація",
-  AboutBest = "aboutBest",
-  AboutCTF = "aboutCTF",
+
   // Users = "/users",
   // Settings = "settings",
   // Notifications = "notifications",
@@ -23,11 +22,13 @@ export interface iScene {
 export class AllScenes {
   public readonly HomeScene = HomeScene;
   public readonly RegistrationScene = RegistrationScene;
+  public readonly PostingScene = PostingScene;
+  
 
   public allScenes: iScene[] = [
     {
       name: SceneEnum.Home,
-      nextScenes: [SceneEnum.Registration, SceneEnum.AboutBest, SceneEnum.AboutCTF],
+      nextScenes: [SceneEnum.Registration,],
       prevScene: null,
       // module: HomeScene,
       enter: this.HomeScene.enter,
@@ -38,6 +39,6 @@ export class AllScenes {
       prevScene: SceneEnum.Home,
       // module: PostingScene,
       enter: this.RegistrationScene.enter,
-    }
-  ];
+    },
+   ];
 }

@@ -12,6 +12,20 @@ export const startMessage = `
 - Створювати та приєднувати людей до своєї команди
 - Визначити чи ти 0 чи 1
 `;
+const aboutBestText = `
+<a href="google.com">BEST Lviv</a>  — європейська студентська волонтерська організація з 85 осередками в 30 країнах.
+
+Організація спрямована на розвиток студентів у сф'ері технологій, інженерії та менеджменту.
+
+Наша місія — розвиток студентів, а візія — сила у різноманітті
+
+Щороку, ми організовуємо близько 4 - х масштабних івентів, серед яких:
+HACKath0n, BEC(Best Engineering Competition), BTW(BEST Training Week) та BCI(Best Company Insight)
+
+Детальніше про ці івенти ви можете дізнатися в нашому інстаграмі:
+<a href='https://www.instagram.com/best_lviv/ '>https://www.instagram.com/best_lviv/ </a>
+
+`;
 export class HomeService {
   private readonly UserDb: UserDb;
   private readonly sender: Sender;
@@ -44,7 +58,10 @@ export class HomeService {
 
     await this.sendLocalStageKeyboard(chatId);
   }
-
+  async handleAboutBest(message: MessageType) {
+    const chatId = message.chat.id;
+    this.sender.sendText(chatId, aboutBestText)
+  }
   async handleKeyboard(message: MessageType) {
     const chatId = message.chat.id;
 

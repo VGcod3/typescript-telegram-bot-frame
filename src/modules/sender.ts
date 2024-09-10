@@ -39,6 +39,7 @@ export class Sender {
     await this.bot.sendMessage({
       chat_id: chatId,
       text,
+      parse_mode: "HTML",
       reply_markup: {
         keyboard,
         one_time_keyboard: true,

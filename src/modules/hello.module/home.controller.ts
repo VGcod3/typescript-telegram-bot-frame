@@ -20,9 +20,9 @@ export class HomeController {
     if (message.text === "/start") {
       this.homeService.handleStart(message);
     }
-    // else if (message.text === "/users") {
-    //   this.homeService.handleUsers(message);
-    // }
+    if(message.text === "Про бест"){
+      this.homeService.handleAboutBest(message);
+    }
     else {
       this.homeService.handleKeyboard(message);
     }
