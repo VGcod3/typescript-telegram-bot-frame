@@ -34,7 +34,8 @@ export class Sender {
   async sendKeyboard(
     chatId: number,
     text: string,
-    keyboard: KeyboardButton[][]
+    keyboard: KeyboardButton[][],
+    one_time_keyboard = false,
   ) {
     await this.bot.sendMessage({
       chat_id: chatId,
@@ -42,7 +43,7 @@ export class Sender {
       parse_mode: "HTML",
       reply_markup: {
         keyboard,
-        one_time_keyboard: true,
+        one_time_keyboard: one_time_keyboard,
         resize_keyboard: true,
       },
     });

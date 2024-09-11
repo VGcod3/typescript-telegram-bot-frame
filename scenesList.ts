@@ -5,7 +5,8 @@ import { RegistrationScene } from "./src/modules/registration.module/registratio
 export enum SceneEnum {
   Home = "home",
   Registration = "Реєстрація",
-
+  AboutBest = "Про бест",
+  AboutCTF = "Про івент",
   // Users = "/users",
   // Settings = "settings",
   // Notifications = "notifications",
@@ -28,7 +29,7 @@ export class AllScenes {
   public allScenes: iScene[] = [
     {
       name: SceneEnum.Home,
-      nextScenes: [SceneEnum.Registration,],
+      nextScenes: [SceneEnum.Registration, SceneEnum.AboutBest, SceneEnum.AboutCTF],
       prevScene: null,
       // module: HomeScene,
       enter: this.HomeScene.enter,

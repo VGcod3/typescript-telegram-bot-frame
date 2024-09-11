@@ -47,7 +47,7 @@ export class SessionManager {
     const sessionData = {
       currentScene: SceneEnum.Home,
       data: {
-        registrationStep: RegistrationSteps.START
+        registrationStep: RegistrationSteps.ASK_NAME
       },
     };
 

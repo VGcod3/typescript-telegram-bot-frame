@@ -20,8 +20,11 @@ export class HomeController {
     if (message.text === "/start") {
       this.homeService.handleStart(message);
     }
-    if(message.text === "Про бест"){
+    else if(message.text === "Про бест"){
       this.homeService.handleAboutBest(message);
+    }
+    else if (message.text === "Про івент") {
+      this.homeService.handleAboutCTF(message);
     }
     else {
       this.homeService.handleKeyboard(message);
