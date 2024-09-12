@@ -32,8 +32,8 @@ model TeamMember {
   user   User   @relation(fields: [userId], references: [id])
   userId String @unique @db.ObjectId
 
-  team   Team   @relation(fields: [teamId], references: [id])
-  teamId String @unique @db.ObjectId
+  team   Team?   @relation(fields: [teamId], references: [id])
+  teamId String? @unique @db.ObjectId
 
   role String
 

@@ -42,4 +42,17 @@ export class UserDb {
       }
     })
   }
+
+  async getTeamMember(userId: number) {
+    const user = await prisma.user.findUnique({
+      where: {
+        userId,
+      }
+    })
+    return await prisma.teamMember.findUnique({
+      where: {
+        userId: user?.id,
+      }
+    })
+  }
 }
