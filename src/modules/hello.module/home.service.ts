@@ -97,8 +97,8 @@ export class HomeService {
         ], true);
       }
     } else {
-      this.sender.sendText(chatId, "Такого варіанту не існує");
-      this.sendLocalStageKeyboard(chatId, startMessage);
+      await this.sender.sendText(chatId, "Такого варіанту не існує");
+      await this.sendLocalStageKeyboard(chatId, startMessage);
     }
 
   }

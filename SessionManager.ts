@@ -31,6 +31,7 @@ export class SessionManager {
     session.data.registrationStep = step;
 
     this.sessions.set(chatId, session);
+    this.userDb.updateUser(chatId, session);
   }
   public async loadSessionsFromDb() {
     const users = await this.userDb.getAllUsers();

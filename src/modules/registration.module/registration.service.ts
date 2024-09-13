@@ -64,8 +64,11 @@ export class RegistrationService {
         console.log("Setting step: " + step);
         this.sessionManager.updateRegistrationStep(chatId, step);
     }
-    async handleUserInput(schema: any, chatId: number, curentStep: RegistrationSteps, nextStep: RegistrationSteps, isNumber = false) {
+    async handleUserInput(schema: any, chatId: number, nextStep: RegistrationSteps, isNumber = false) {
         this.bot.once("message", async (message: MessageType) => {
+            if (message.chat.id !== chatId) {
+                return; 
+            }
             const text = message.text;
             const contact = message.contact?.phone_number;
             if (isNumber) {
@@ -128,6 +131,7 @@ export class RegistrationService {
         await this.sender.sendText(chatId, "Дякуємо за реєстрацію");
         console.log("Temporary data: " + this.temporaryData.get(chatId));
         this.UserDb.createTeamMember(chatId, this.temporaryData.get(chatId));
+        this.sessionManager.updateRegistrationStep(chatId, RegistrationSteps.FINISHED);
         this.temporaryData.delete(chatId);
     }
     async collectData(message: MessageType) {
@@ -152,29 +156,29 @@ export class RegistrationService {
 
                 case RegistrationSteps.ASK_NAME:
                     await this.sender.sendKeyboard(chatId, "Введіть ваше ім'я", [[]])
-                    await this.handleUserInput(name, chatId, RegistrationSteps.ASK_NAME, RegistrationSteps.ASK_SURNAME);
+                    await this.handleUserInput(name, chatId, RegistrationSteps.ASK_SURNAME);
                     break;
 
                 case RegistrationSteps.ASK_SURNAME:
                     await this.sender.sendKeyboard(chatId, "Введіть ваше прізвище", [[]]);
-                    await this.handleUserInput(surname, chatId, RegistrationSteps.ASK_SURNAME, RegistrationSteps.ASK_AGE);
+                    await this.handleUserInput(surname, chatId, RegistrationSteps.ASK_AGE);
                     break;
 
                 case RegistrationSteps.ASK_AGE:
                     await this.sender.sendKeyboard(chatId, "Введіть ваш вік", [[]])
-                    await this.handleUserInput(age, chatId, RegistrationSteps.ASK_AGE, RegistrationSteps.ASK_UNIVERSITY, true);
+                    await this.handleUserInput(age, chatId, RegistrationSteps.ASK_UNIVERSITY, true);
                     break;
 
                 case RegistrationSteps.ASK_UNIVERSITY:
                     await this.sender.sendKeyboard(chatId, "Введіть ваш університет", [
                         [{ text: "НУЛП" }, { text: "ЛНУ" }, { text: "НЛУУ" }],
                     ], true);
-                    await this.handleUserInput(university, chatId, RegistrationSteps.ASK_UNIVERSITY, RegistrationSteps.ASK_GROUP);
+                    await this.handleUserInput(university, chatId, RegistrationSteps.ASK_GROUP);
                     break;
 
                 case RegistrationSteps.ASK_GROUP:
                     await this.sender.sendText(chatId, "Введіть вашу групу");
-                    await this.handleUserInput(group, chatId, RegistrationSteps.ASK_GROUP, RegistrationSteps.ASK_COURSE);
+                    await this.handleUserInput(group, chatId, RegistrationSteps.ASK_COURSE);
                     break;
 
                 case RegistrationSteps.ASK_COURSE:
@@ -182,24 +186,24 @@ export class RegistrationService {
                         [{ text: "1" }, { text: "2" }, { text: "3" }],
                         [{ text: "4" }, { text: "5" }, { text: "6" }],
                     ], true);
-                    await this.handleUserInput(course, chatId, RegistrationSteps.ASK_COURSE, RegistrationSteps.ASK_SOURCE, true);
+                    await this.handleUserInput(course, chatId, RegistrationSteps.ASK_SOURCE, true);
                     break;
 
                 case RegistrationSteps.ASK_SOURCE:
                     await this.sender.sendText(chatId, "Як ви дізналися про нас?");
-                    await this.handleUserInput(source, chatId, RegistrationSteps.ASK_SOURCE, RegistrationSteps.ASK_CONTACT);
+                    await this.handleUserInput(source, chatId, RegistrationSteps.ASK_CONTACT);
                     break;
 
                 case RegistrationSteps.ASK_CONTACT:
                     await this.sender.sendKeyboard(chatId, "Поіділться буль ласка номером телефону", [
                         [{ text: "Поділитися номером", request_contact: true }],
                     ], true);
-                    await this.handleUserInput(contact, chatId, RegistrationSteps.ASK_CONTACT, RegistrationSteps.FINISHED);
+                    await this.handleUserInput(contact, chatId, RegistrationSteps.FINISHED);
                     break;
 
                 case RegistrationSteps.FINISHED:
 
-                    await this.handleUserInput(ZodAny, chatId, RegistrationSteps.FINISHED, RegistrationSteps.FINISHED);
+                    await this.handleUserInput(ZodAny, chatId, RegistrationSteps.FINISHED);
                     await this.sceneNavigator.goBack(chatId);
                     break;
             }
