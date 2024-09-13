@@ -1,5 +1,7 @@
+import { TeamMember } from "@prisma/client";
 import { RegistrationSteps } from "../modules/registration.module/registration.service";
 import { prisma } from "./prisma.client";
+import { connect } from "http2";
 
 export interface IUserData {
   registrationStep: RegistrationSteps;
@@ -33,13 +35,23 @@ export class UserDb {
   async getAllUsers() {
     return await prisma.user.findMany();
   }
-  async createTeamMember(userId: number, data: any) {
-
-    return await prisma.teamMember.create({
-      data: {
-        ...data,
-        userId: userId.toString(),
+  async createTeamMember(chatId: number, data: any) {
+    const user = await prisma.user.findUnique({
+      where: {
+        userId: chatId,
       }
+    })
+    return await prisma.teamMember.create({
+      
+      data: {
+        userData: data,
+        user: {
+          connect: {
+            id: user?.id,
+          }
+        }
+      }
+
     })
   }
 

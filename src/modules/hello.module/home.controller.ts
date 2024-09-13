@@ -17,6 +17,7 @@ export class HomeController {
   }
 
   public async handleTextMessage(message: MessageType) {
+
     if (message.text === "/start") {
       this.homeService.handleStart(message);
     }

@@ -28,7 +28,7 @@ export class SessionManager {
   public updateRegistrationStep(chatId: number, step: RegistrationSteps) {
     const session = this.sessions.get(chatId)!;
 
-    session.data.RegistrationStep = step;
+    session.data.registrationStep = step;
 
     this.sessions.set(chatId, session);
   }

@@ -86,8 +86,11 @@ export class HomeService {
     if (message.text === "Назад") {
       this.sceneNavigator.goBack(chatId);
     } else if (availableSceneNames.includes(message.text as SceneEnum)) {
-      this.sceneNavigator.setScene(chatId, message.text as SceneEnum);
-      if(message.text === "Реєстрація"){
+      if (message.text !== "Реєстрація") {
+        this.sceneNavigator.setScene(chatId, message.text as SceneEnum);
+      }
+      if (message.text === "Реєстрація" && await this.UserDb.getTeamMember(chatId) === null) {
+        this.sceneNavigator.setScene(chatId, message.text as SceneEnum);
         this.sender.sendKeyboard(chatId, "Перед початком реєстрації підтвердьте дозвіл на обробку ваших даних", [
           [{ text: "Почати реєстрацію" }],
           [{ text: "Назад" }]
@@ -95,9 +98,9 @@ export class HomeService {
       }
     } else {
       this.sender.sendText(chatId, "Такого варіанту не існує");
+      this.sendLocalStageKeyboard(chatId, startMessage);
     }
 
-    // await this.sendLocalStageKeyboard(chatId, "Перед початком реєстрації підтвердьте дозвіл на обробку ваших даних");
   }
 
   async handleUsers(message: MessageType) {

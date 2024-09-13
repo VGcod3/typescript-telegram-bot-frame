@@ -18,7 +18,7 @@ export class RegistrationController {
   }
 
   public async handleTextMessage(message: MessageType) {
-    if (message.text !== "Назад") {
+    if (message.text !== "Назад" ) {
       this.registrationService.collectData(message);
     }
     else {
