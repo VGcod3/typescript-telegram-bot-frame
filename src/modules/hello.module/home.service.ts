@@ -3,38 +3,8 @@ import { UserDb } from "../../db.utils/user.utils";
 import { SceneNavigator } from "../../../SceneNavigator";
 import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
-export const startMessage = `
-<b>Цей бот допоможе тобі:</b>
-- Зареєструватися на BEST CTF
-- Розпочати тестове завдання
-- Знайти необхідну інформацію про CTF, такі як розклад, правила
-- Отримувати сповіщення від організаторів у реальному часі
-- Створювати та приєднувати людей до своєї команди
-- Визначити чи ти 0 чи 1
-`;
-const aboutBestText = `
-<a href="google.com">BEST Lviv</a>  — європейська студентська волонтерська організація з 85 осередками в 30 країнах.
+import { aboutBestText, aboutEventText, startMessage } from "../../sharedText";
 
-Організація спрямована на розвиток студентів у сф'ері технологій, інженерії та менеджменту.
-
-Наша місія — розвиток студентів, а візія — сила у різноманітті
-
-Щороку, ми організовуємо близько 4 - х масштабних івентів, серед яких:
-HACKath0n, BEC(Best Engineering Competition), BTW(BEST Training Week) та BCI(Best Company Insight)
-
-Детальніше про ці івенти ви можете дізнатися в нашому інстаграмі:
-<a href='https://www.instagram.com/best_lviv/ '>https://www.instagram.com/best_lviv/ </a>
-
-`;
-const aboutEventText = `
-<u><i>Щоб знати як захищати, треба знати як атакувати!</i></u>
-
-<b>BEST CTF</b> — це командні змагання з інформаційної безпеки, які проводяться у форматі "захоплення прапора", де команди намагаються знайти більше вразливостей в системі, і використовуючи їх отримати секретні дані.
-
-<b>Змагання будуть відбуватися 16-17 листопада.</b>
-
-Наш сайт: <a href="google.com">(посилання)</a>
-`;
 export class HomeService {
   private readonly UserDb: UserDb;
   private readonly sender: Sender;

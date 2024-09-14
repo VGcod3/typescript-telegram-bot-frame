@@ -18,11 +18,26 @@ export class TeamController {
   }
 
   public async handleTextMessage(message: MessageType) {
-    if (message.text !== "Назад" ) {
-    
+    if (message.text === "Про бест") {
+      this.teamService.handleAboutBest(message);
     }
-    else {
-      this.teamService.handleKeyboard(message);
+    else if (message.text === "Про івент") {
+      this.teamService.handleAboutCTF(message);
+    }
+    else if (message.text === "Місце проведення") {
+      this.teamService.handleLocation(message);
+    }
+    else if (message.text === "Чат") {
+      this.teamService.handleChat(message);
+    }
+    else if (message.text === "Тестове завдання"){
+      this.teamService.handleTestTask(message);
+    }
+    else if (message.text === "Правила івенту"){
+      this.teamService.handleRules(message);
+    }
+    else if(message.text === "Інформація про команду"){
+      this.teamService.handleTeam(message);
     }
   }
 }

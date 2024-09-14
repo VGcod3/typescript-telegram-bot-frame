@@ -7,7 +7,7 @@ import { SessionManager } from "../../../SessionManager";
 import { UserDb } from "../../db.utils/user.utils";
 import { age, surname, university, group, course, source, contact, name } from "../../z.schemas/schema.TeamMember";
 import { MessageType, Sender } from "../sender";
-import { startMessage } from "../hello.module/home.service";
+import { aboutBestText, aboutChatText, aboutEventText, locationText, rulesText, startMessage, testTaskText } from "../../sharedText";
 
 
 
@@ -70,6 +70,34 @@ export class TeamService {
 
         await this.sender.sendKeyboard(chatId, text, keyboardButtons);
     }
+    async handleAboutBest(message: MessageType) {
+        const chatId = message.chat.id;
+        this.sender.sendText(chatId, aboutBestText)
+    }
+    async handleAboutCTF(message: MessageType) {
+        const chatId = message.chat.id;
+        this.sender.sendText(chatId, aboutEventText)
+    }
+    async handleLocation(message: MessageType) {
+        const chatId = message.chat.id;
+        this.sender.sendText(chatId, locationText)
+    }
+    async handleChat(message: MessageType) {
+        const chatId = message.chat.id;
+        this.sender.sendText(chatId, aboutChatText)
+    }
+    async handleTestTask(message: MessageType) {
+        const chatId = message.chat.id;
+        this.sender.sendText(chatId, testTaskText)
+    }
 
+    async handleRules(message: MessageType) {
+        const chatId = message.chat.id;
+        this.sender.sendText(chatId, rulesText)
+    }
 
+    async handleTeam(message: MessageType) {
+        const chatId = message.chat.id;
+       
+    }   
 }

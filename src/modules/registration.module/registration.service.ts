@@ -7,7 +7,7 @@ import { SessionManager } from "../../../SessionManager";
 import { UserDb } from "../../db.utils/user.utils";
 import { age, surname, university, group, course, source, contact, name } from "../../z.schemas/schema.TeamMember";
 import { MessageType, Sender } from "../sender";
-import { startMessage } from "../hello.module/home.service";
+import { startMessage } from "../../sharedText";
 
 export enum RegistrationSteps {
     ASK_NAME = "ask_name",
