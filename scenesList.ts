@@ -7,17 +7,19 @@ export enum SceneEnum {
   Registration = "Реєстрація",
   AboutBest = "Про бест",
   AboutCTF = "Про івент",
-  Team = "Команда",
   EventLocation = "Місце проведення",
-  TeamInfo = "Інформація про команду",
+  Team = "Інформація про команду",
   EventChat = "Чат",
   TestTask = "Тестове завдання",
   EventRules = "Правила івенту",
-  // Users = "/users",
-  // Settings = "settings",
-  // Notifications = "notifications",
 
-  // Posting = "posting",
+  NewTeam = "",
+  JoinTeam = "Приєднатись до комади",
+  CreateTeam = "Створити команду",
+
+  ExistTeam = "",
+  
+
 }
 
 export interface iScene {
@@ -38,22 +40,31 @@ export class AllScenes {
       name: SceneEnum.Home,
       nextScenes: [SceneEnum.Registration, SceneEnum.AboutBest, SceneEnum.AboutCTF],
       prevScene: null,
-      // module: HomeScene,
       enter: this.HomeScene.enter,
     },
     {
       name: SceneEnum.Registration,
       nextScenes: null,
       prevScene: SceneEnum.Home,
-      // module: PostingScene,
       enter: this.RegistrationScene.enter,
     }, 
     {
       name: SceneEnum.Team,
-      nextScenes: [SceneEnum.AboutBest, SceneEnum.AboutCTF, SceneEnum.EventLocation, SceneEnum.TeamInfo, SceneEnum.EventChat, SceneEnum.TestTask, SceneEnum.EventRules],
+      nextScenes: [SceneEnum.AboutBest, SceneEnum.AboutCTF, SceneEnum.EventLocation, SceneEnum.Team, SceneEnum.EventChat, SceneEnum.TestTask, SceneEnum.EventRules],
       prevScene: null,
-      // module: PostingScene,
+      enter: this.TeamScene.enter,
+    },
+    {
+      name: SceneEnum.NewTeam,
+      nextScenes: [SceneEnum.JoinTeam, SceneEnum.CreateTeam],
+      prevScene: SceneEnum.Team,
       enter: this.TeamScene.enter,
     },
    ];
 }
+
+// Users = "/users",
+// Settings = "settings",
+// Notifications = "notifications",
+
+// Posting = "posting",

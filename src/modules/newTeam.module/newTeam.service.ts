@@ -11,7 +11,7 @@ import { aboutBestText, aboutChatText, aboutEventText, locationText, rulesText, 
 
 
 
-export class TeamService {
+export class NewTeamService {
     constructor(
         private readonly UserDb: UserDb,
         private readonly sender: Sender,
@@ -70,39 +70,8 @@ export class TeamService {
 
         await this.sender.sendKeyboard(chatId, text, keyboardButtons);
     }
-    async handleAboutBest(message: MessageType) {
-        const chatId = message.chat.id;
-        this.sender.sendText(chatId, aboutBestText)
+    async handleJoinTeam(message: MessageType) {
+        
     }
-    async handleAboutCTF(message: MessageType) {
-        const chatId = message.chat.id;
-        this.sender.sendText(chatId, aboutEventText)
-    }
-    async handleLocation(message: MessageType) {
-        const chatId = message.chat.id;
-        this.sender.sendText(chatId, locationText)
-    }
-    async handleChat(message: MessageType) {
-        const chatId = message.chat.id;
-        this.sender.sendText(chatId, aboutChatText)
-    }
-    async handleTestTask(message: MessageType) {
-        const chatId = message.chat.id;
-        this.sender.sendText(chatId, testTaskText)
-    }
-
-    async handleRules(message: MessageType) {
-        const chatId = message.chat.id;
-        this.sender.sendText(chatId, rulesText)
-    }
-
-    async handleTeam(message: MessageType) {
-        const chatId = message.chat.id;
-        const team = await this.UserDb.getTeamMember(chatId);
-        if (team?.teamId === null) {
-            this.sender.sendText(chatId, "Ви ще не в команді");
-            await this.sceneNavigator.setScene(chatId, SceneEnum.NewTeam);
-            await this.sendLocalStageKeyboard(chatId, "Виберіть дію");
-        }
-    }
+    async handleCreateTeam(message: MessageType) {}
 }
