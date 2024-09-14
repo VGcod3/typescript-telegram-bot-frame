@@ -1,6 +1,6 @@
 import { TelegramBot } from "typescript-telegram-bot-api";
 import { MessageType, Sender } from "../sender";
-import { TeamService } from "./team.service";
+import { TeamService } from "./teamMember.service";
 import { BotInstance } from "../../../BotInstance";
 
 export class TeamController {
@@ -30,13 +30,13 @@ export class TeamController {
     else if (message.text === "Чат") {
       this.teamService.handleChat(message);
     }
-    else if (message.text === "Тестове завдання"){
+    else if (message.text === "Тестове завдання") {
       this.teamService.handleTestTask(message);
     }
-    else if (message.text === "Правила івенту"){
+    else if (message.text === "Правила івенту") {
       this.teamService.handleRules(message);
     }
-    else if(message.text === "Інформація про команду"){
+    else if (message.text === "Інформація про команду") {
       this.teamService.handleTeam(message);
     }
   }

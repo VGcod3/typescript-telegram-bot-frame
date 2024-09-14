@@ -98,6 +98,9 @@ export class TeamService {
 
     async handleTeam(message: MessageType) {
         const chatId = message.chat.id;
-       
+        const team = await this.UserDb.getTeamMember(chatId);
+        if(team?.teamId === null){
+            this.sender.sendText(chatId, "Ви ще не в команді")
+        }
     }   
 }

@@ -1,7 +1,7 @@
 import { HomeScene } from "./src/modules/hello.module/home.scene";
 import { PostingScene } from "./src/modules/posting.module/posting.scene";
 import { RegistrationScene } from "./src/modules/registration.module/registration.scene";
-import { TeamScene } from "./src/modules/team.module/team.scene";
+import { TeamScene } from "./src/modules/teamMember.module/teamMember.scene";
 export enum SceneEnum {
   Home = "home",
   Registration = "Реєстрація",
