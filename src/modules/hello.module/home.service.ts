@@ -55,7 +55,10 @@ export class HomeService {
     await this.sessionManager.initSession(chatId);
 
     const user = await this.UserDb.getUser(chatId);
-
+    const teamMember = await this.UserDb.getTeamMember(chatId);
+    if (teamMember){
+      
+    }
     if (user) {
       await this.sender.sendText(chatId, "Радий знову тебе бачити!");
 

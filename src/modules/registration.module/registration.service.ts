@@ -66,42 +66,42 @@ export class RegistrationService {
     }
     async handleUserInput(schema: any, chatId: number, nextStep: RegistrationSteps, isNumber = false) {
         this.bot.once("message", async (message: MessageType) => {
-            if (message.chat.id !== chatId) {
-                return; 
-            }
-            const text = message.text;
-            const contact = message.contact?.phone_number;
-            if (isNumber) {
-                const number = Number(text);
-                if (!schema.safeParse(number).success) {
-                    await this.sender.sendText(chatId, `${schema.safeParse(number).error.errors[0]?.message}`);
-                    return;
+            if (message.chat.id === chatId) {
+                const text = message.text;
+                const contact = message.contact?.phone_number;
+                if (isNumber) {
+                    const number = Number(text);
+                    if (!schema.safeParse(number).success) {
+                        await this.sender.sendText(chatId, `${schema.safeParse(number).error.errors[0]?.message}`);
+                        return;
+                    }
+                    else {
+                        this.temporaryData.get(chatId)?.push(number);
+                        await this.setUserStep(chatId, nextStep);
+                    }
+
                 }
+
+                else if (contact !== undefined) {
+                    console.log("Contact: " + contact);
+                    this.temporaryData.get(chatId)?.push(contact);
+                    await this.handleFinishStep(chatId);
+                    await this.sceneNavigator.goBack(chatId);
+                    await this.sendLocalStageKeyboard(chatId, startMessage);
+                }
+
                 else {
-                    this.temporaryData.get(chatId)?.push(number);
-                    await this.setUserStep(chatId, nextStep);
+                    if (!schema.safeParse(text).success) {
+                        await this.sender.sendText(chatId, `${schema.safeParse(text).error.errors[0]?.message}`);
+                        return;
+                    }
+                    else {
+                        this.temporaryData.get(chatId)?.push(text);
+                        await this.setUserStep(chatId, nextStep);
+                    }
+
+
                 }
-
-            }
-
-            else if (contact !== undefined) {
-                console.log("Contact: " + contact);
-                this.temporaryData.get(chatId)?.push(contact);
-                await this.handleFinishStep(chatId);
-                await this.sceneNavigator.goBack(chatId);
-            }
-
-            else {
-                if (!schema.safeParse(text).success) {
-                    await this.sender.sendText(chatId, `${schema.safeParse(text).error.errors[0]?.message}`);
-                    return;
-                }
-                else {
-                    this.temporaryData.get(chatId)?.push(text);
-                    await this.setUserStep(chatId, nextStep);
-                }
-
-
             }
         });
     }
@@ -115,11 +115,12 @@ export class RegistrationService {
 
     async sendLocalStageKeyboard(chatId: number, text: string) {
         const currentScene = await this.sceneNavigator.getCurrentScene(chatId);
-
+        console.log("Current scene: " + currentScene);
         const availableScenesNames =
             await this.sceneNavigator.getAvailableNextScenes(chatId);
 
         const canGoBack = !!currentScene.prevScene;
+        console.log("Available scenes: " + availableScenesNames);
 
         await this.sender.sendKeyboard(chatId, text, [
             availableScenesNames.map((scene) => ({ text: scene })),
@@ -204,7 +205,9 @@ export class RegistrationService {
                 case RegistrationSteps.FINISHED:
 
                     await this.handleUserInput(ZodAny, chatId, RegistrationSteps.FINISHED);
-                    await this.sceneNavigator.goBack(chatId);
+                   
+                 
+                    
                     break;
             }
         }
