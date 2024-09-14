@@ -98,7 +98,7 @@ export class SceneNavigator {
     bot.removeAllListeners();
 
     currentScene.enter();
-    
+  
     // new sceneModule(this.sessions);
 
     // console.log(sceneModule);

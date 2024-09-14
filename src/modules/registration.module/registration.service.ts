@@ -86,7 +86,7 @@ export class RegistrationService {
                     console.log("Contact: " + contact);
                     this.temporaryData.get(chatId)?.push(contact);
                     await this.handleFinishStep(chatId);
-                    await this.sceneNavigator.goBack(chatId);
+                    await this.sceneNavigator.setScene(chatId, SceneEnum.Team);
                     await this.sendLocalStageKeyboard(chatId, startMessage);
                 }
 

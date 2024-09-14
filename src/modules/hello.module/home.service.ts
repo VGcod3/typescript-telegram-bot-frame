@@ -56,10 +56,11 @@ export class HomeService {
 
     const user = await this.UserDb.getUser(chatId);
     const teamMember = await this.UserDb.getTeamMember(chatId);
-    if (teamMember){
-      
+    if (teamMember) {
+      await this.sender.sendText(chatId, "Радий знову тебе бачити!");
+      await this.sceneNavigator.setScene(chatId, SceneEnum.Team);
     }
-    if (user) {
+    else if (user) {
       await this.sender.sendText(chatId, "Радий знову тебе бачити!");
 
     } else {
@@ -117,19 +118,30 @@ export class HomeService {
       await this.sender.sendText(chatId, `Error: ${error}`);
     }
   }
-
+  private chunkArray<T>(arr: T[], size: number): T[][] {
+    const result: T[][] = [];
+    for (let i = 0; i < arr.length; i += size) {
+      result.push(arr.slice(i, i + size));
+    }
+    return result;
+  }
   private async sendLocalStageKeyboard(chatId: number, text: string) {
     const currentScene = await this.sceneNavigator.getCurrentScene(chatId);
 
     const availableScenesNames =
       await this.sceneNavigator.getAvailableNextScenes(chatId);
 
-    const canGoBack = !!currentScene.prevScene;
+    const scenesButtons = availableScenesNames.map((scene) => ({ text: scene }));
 
-    await this.sender.sendKeyboard(chatId, text, [
-      availableScenesNames.map((scene) => ({ text: scene })),
+    // Split buttons into groups of two per row
+    const keyboardButtons = this.chunkArray(scenesButtons, 2);
 
-      canGoBack ? [{ text: "Назад" }] : [],
-    ]);
+    // const canGoBack = !!currentScene.prevScene;
+    // if (canGoBack) {
+    //   keyboardButtons.push([{ text: "Назад" }]);
+    // }
+
+
+    await this.sender.sendKeyboard(chatId, text, keyboardButtons);
   }
 }

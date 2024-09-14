@@ -1,12 +1,18 @@
 import { HomeScene } from "./src/modules/hello.module/home.scene";
 import { PostingScene } from "./src/modules/posting.module/posting.scene";
 import { RegistrationScene } from "./src/modules/registration.module/registration.scene";
-
+import { TeamScene } from "./src/modules/team.module/team.scene";
 export enum SceneEnum {
   Home = "home",
   Registration = "Реєстрація",
   AboutBest = "Про бест",
   AboutCTF = "Про івент",
+  Team = "Команда",
+  EventLocation = "Місце проведення",
+  TeamInfo = "Інформація про команду",
+  EventChat = "Чат",
+  TestTask = "Тестове завдання",
+  EventRules = "Правила івенту",
   // Users = "/users",
   // Settings = "settings",
   // Notifications = "notifications",
@@ -23,7 +29,8 @@ export interface iScene {
 export class AllScenes {
   public readonly HomeScene = HomeScene;
   public readonly RegistrationScene = RegistrationScene;
-  public readonly PostingScene = PostingScene;
+  // public readonly PostingScene = PostingScene;
+  public readonly TeamScene = TeamScene;
   
 
   public allScenes: iScene[] = [
@@ -40,6 +47,13 @@ export class AllScenes {
       prevScene: SceneEnum.Home,
       // module: PostingScene,
       enter: this.RegistrationScene.enter,
+    }, 
+    {
+      name: SceneEnum.Team,
+      nextScenes: [SceneEnum.AboutBest, SceneEnum.AboutCTF, SceneEnum.EventLocation, SceneEnum.TeamInfo, SceneEnum.EventChat, SceneEnum.TestTask, SceneEnum.EventRules],
+      prevScene: null,
+      // module: PostingScene,
+      enter: this.TeamScene.enter,
     },
    ];
 }
