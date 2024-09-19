@@ -1,4 +1,3 @@
-import { TeamMember } from "@prisma/client";
 import { RegistrationSteps } from "../modules/registration.module/registration.service";
 import { prisma } from "./prisma.client";
 import { connect } from "http2";
@@ -13,7 +12,7 @@ export class UserDb {
         userId,
       },
     });
-  }
+  } 
 
   async getUser(userId: number) {
     return await prisma.user.findUnique({
@@ -61,10 +60,15 @@ export class UserDb {
         userId,
       }
     })
-    return await prisma.teamMember.findUnique({
-      where: {
-        userId: user?.id,
-      }
-    })
+    if(user?.id !== null){
+      return prisma.teamMember.findUnique({
+        where: {
+          userId: user!.id,
+        }
+      })
+    } else {
+      return null;
+    }
+  
   }
 }

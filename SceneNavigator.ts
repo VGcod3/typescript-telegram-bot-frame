@@ -54,15 +54,29 @@ export class SceneNavigator {
     }
   }
 
-  public async getAvailableNextScenes(chatId: number): Promise<SceneEnum[]> {
+  public async getAvailableNextScenes(chatId: number, teamMember: any,): Promise<SceneEnum[]> {
     const session = this.sessions.get(chatId);
 
     if (!session) {
       await this.sessionManager.initSession(chatId);
-      return this.getAvailableNextScenes(chatId);
+      return this.getAvailableNextScenes(chatId, null);
     }
 
     const currentScene = await this.getCurrentScene(chatId);
+ 
+
+    if (currentScene.name === SceneEnum.Home && teamMember !== null) {
+      console.log("teamMember");
+      return [
+        SceneEnum.AboutBest,
+        SceneEnum.AboutCTF,
+        SceneEnum.EventLocation,
+        SceneEnum.Team,
+        SceneEnum.EventChat,
+        SceneEnum.TestTask,
+        SceneEnum.EventRules,
+      ];
+    }
 
     const nextScenes = currentScene.nextScenes;
 
@@ -98,9 +112,5 @@ export class SceneNavigator {
     bot.removeAllListeners();
 
     currentScene.enter();
-  
-    // new sceneModule(this.sessions);
-
-    // console.log(sceneModule);
-  }
+}
 }
