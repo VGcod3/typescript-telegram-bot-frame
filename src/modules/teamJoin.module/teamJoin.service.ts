@@ -27,27 +27,24 @@ export class TeamJoinService {
 
     if (enteredText === "Назад") {
       this.sceneNavigator.goBack(chatId);
-      return;
+      this.sendLocalStageKeyboard(chatId, "Оберіть дію");
+    } else {
+      try {
+        await this.joinTeam(enteredText, chatId);
+      } catch (error) {
+        await this.sender.sendText(
+          chatId,
+          "Сталася помилка. Спробуйте ще раз пізніше.",
+        );
+        await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+        this.sendLocalStageKeyboard(chatId, "Оберіть дію");
+      }
     }
 
-    try {
-      const team = await this.joinTeam(enteredText, chatId);
-      if (!team) {
-        await this.sendLocalStageKeyboard(chatId, "Команду не знайдено");
-      } else {
-        await this.sender.sendText(chatId, "Ви приєдналися до команди!");
-        this.sceneNavigator.setScene(chatId, SceneEnum.Home);
-        await this.sendLocalStageKeyboard(chatId, "Оберіть дію");
-      }
-    } catch (error) {
-      await this.sender.sendText(
-        chatId,
-        "Сталася помилка. Спробуйте ще раз пізніше.",
-      );
-    }
+    
   }
 
-  private async joinTeam(teamId: string, chatId: number): Promise<Team | null> {
+  private async joinTeam(teamId: string, chatId: number) {
     const parsedData = objectIdSchema.safeParse(teamId);
 
     if (!parsedData.success) {
@@ -55,45 +52,51 @@ export class TeamJoinService {
         chatId,
         `Помилка: ${parsedData.error.errors[0].message}`,
       );
-      return null;
+      return;
     }
 
     try {
       const team = await prisma.team.findUnique({
         where: { id: teamId },
       });
-     
+
       if (!team) {
         await this.sender.sendText(chatId, "Команду з таким ID не знайдено.");
-        return null;
+        await this.sceneNavigator.setScene(chatId, SceneEnum.TeamHandle);
+      } else {
+        const members = await prisma.teamMember.findMany({
+          where: {
+            teamId: teamId
+          }
+        })
+
+        if (members.length >= 5) {
+          await this.sender.sendText(chatId, "Команда вже заповнена");
+          await this.sceneNavigator.setScene(chatId, SceneEnum.TeamHandle);
+        } else {
+          await this.sender.sendText(chatId, "Ви приєдналися до команди!");
+
+          const user = await prisma.user.findUnique({
+            where: {
+              userId: chatId,
+            },
+          });
+          await prisma.teamMember.update({
+            where: {
+              userId: user?.id,
+            },
+            data: {
+              teamId: teamId,
+            },
+          });
+          await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+        }
       }
-      const membersCount = await prisma.teamMember.findMany({
-        where: {
-          teamId: teamId
-        }
-      })
-      if(membersCount.length > 5){
-        await this.sender.sendText(chatId, "Команда вже заповнена");
-        return null;
-      }
-      const user = await prisma.user.findUnique({
-        where: {
-          userId: chatId
-        }
-      })
-      await prisma.teamMember.update({
-        where: {
-          userId: user?.id
-        },
-        data: {
-          teamId: teamId
-        }
-      })
-      return team;
     } catch (error) {
       await this.sender.sendText(chatId, "Сталася помилка при пошуку команди.");
-      return null;
+      await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
     }
+    await this.sendLocalStageKeyboard(chatId, "Оберіть дію");
   }
 
   private chunkArray<T>(arr: T[], size: number): T[][] {
