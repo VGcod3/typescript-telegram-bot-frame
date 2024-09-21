@@ -7,4 +7,5 @@ export interface ITeamMemberData {
     course: number;
     source: string;
     number: string;
+    contact: string
 }

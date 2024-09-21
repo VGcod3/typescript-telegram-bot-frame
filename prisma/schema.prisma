@@ -27,7 +27,7 @@ model User {
 
 model TeamMember {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
-  userData Json   @default("{}") @map("userData")
+  userData Json   @map("userData")
 
   user   User   @relation(fields: [userId], references: [id])
   userId String @unique @db.ObjectId

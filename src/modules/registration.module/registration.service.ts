@@ -16,6 +16,7 @@ import {
 } from "../../z.schemas/schema.TeamMember";
 import { MessageType, Sender } from "../sender";
 import { startMessage } from "../../sharedText";
+import { ITeamMemberData } from "../../interfaces/teamMemberData";
 
 export enum RegistrationSteps {
   ASK_NAME = "ask_name",
@@ -43,7 +44,7 @@ export class RegistrationService {
   }
 
   private bot = BotInstance.getInstance();
-  public temporaryData = new Map<number, any[]>();
+  public temporaryData = new Map<number, ITeamMemberData>() as any;
 
   async handleKeyboard(message: MessageType) {
     const chatId = message.chat.id;
@@ -73,48 +74,77 @@ export class RegistrationService {
     schema: any,
     chatId: number,
     nextStep: RegistrationSteps,
-    isNumber = false
+    fieldName: keyof ITeamMemberData, // Dynamically pass the field name
+    isNumber = false,
   ) {
     this.bot.once("message", async (message: MessageType) => {
       if (message.chat.id !== chatId) return;
-  
+
       const { text, contact } = message;
       const phoneNumber = contact?.phone_number;
-  
+
+      // Handle number validation
       if (isNumber && text) {
         const number = Number(text);
         const validationResult = schema.safeParse(number);
         if (!validationResult.success) {
-          await this.sender.sendText(chatId, validationResult.error.errors[0]?.message);
+          await this.sender.sendText(
+            chatId,
+            validationResult.error.errors[0]?.message,
+          );
           return;
         }
-  
-        this.temporaryData.get(chatId)?.push(number);
+
+        this.updateTeamMemberField(chatId, fieldName, number);
+        console.log(this.temporaryData.get(chatId)![fieldName]);
         await this.setUserStep(chatId, nextStep);
         return;
       }
-  
+
       if (phoneNumber) {
-        this.temporaryData.get(chatId)?.push(phoneNumber);
+        this.updateTeamMemberField(chatId, fieldName, phoneNumber);
+        console.log(this.temporaryData.get(chatId));
+        const teamMemberData = { ...this.temporaryData.get(chatId) };
+        await this.UserDb.createTeamMember(chatId, teamMemberData);
+      
         await this.handleFinishStep(chatId);
         await this.sender.sendText(chatId, "Дякуємо за реєстрацію");
         await this.sendLocalStageKeyboard(chatId, startMessage);
         return;
       }
-  
+
       if (text) {
         const validationResult = schema.safeParse(text);
         if (!validationResult.success) {
-          await this.sender.sendText(chatId, validationResult.error.errors[0]?.message);
+          await this.sender.sendText(
+            chatId,
+            validationResult.error.errors[0]?.message,
+          );
           return;
         }
-  
-        this.temporaryData.get(chatId)?.push(text);
+
+        // Dynamically set the field using bracket notation
+        this.updateTeamMemberField(chatId, fieldName, text);
+        console.log(this.temporaryData.get(chatId)![fieldName]);
         await this.setUserStep(chatId, nextStep);
       }
     });
   }
-  
+
+  updateTeamMemberField = <K extends keyof ITeamMemberData>(
+    chatId: number,
+    field: K,
+    value: any,
+  ) => {
+    const member = this.temporaryData.get(chatId);
+
+    if (member) {
+      member[field] = value;
+
+      this.temporaryData.set(chatId, member);
+    }
+  };
+
   async getUserStep(chatId: number): Promise<RegistrationSteps> {
     const userSession = await this.sessionManager.getSession(chatId);
     if (!userSession.data.registrationStep) {
@@ -152,8 +182,6 @@ export class RegistrationService {
   }
 
   private async handleFinishStep(chatId: number) {
-    
-    await this.UserDb.createTeamMember(chatId, this.temporaryData.get(chatId));
     this.sessionManager.updateRegistrationStep(
       chatId,
       RegistrationSteps.FINISHED,
@@ -182,6 +210,7 @@ export class RegistrationService {
             name,
             chatId,
             RegistrationSteps.ASK_SURNAME,
+            "name",
           );
           break;
 
@@ -191,6 +220,7 @@ export class RegistrationService {
             surname,
             chatId,
             RegistrationSteps.ASK_AGE,
+            "surname",
           );
           break;
 
@@ -200,6 +230,7 @@ export class RegistrationService {
             age,
             chatId,
             RegistrationSteps.ASK_UNIVERSITY,
+            "age",
             true,
           );
           break;
@@ -215,6 +246,7 @@ export class RegistrationService {
             university,
             chatId,
             RegistrationSteps.ASK_GROUP,
+            "university",
           );
           break;
 
@@ -224,6 +256,7 @@ export class RegistrationService {
             group,
             chatId,
             RegistrationSteps.ASK_COURSE,
+            "group",
           );
           break;
 
@@ -241,6 +274,7 @@ export class RegistrationService {
             course,
             chatId,
             RegistrationSteps.ASK_SOURCE,
+            "course",
             true,
           );
           break;
@@ -251,6 +285,7 @@ export class RegistrationService {
             source,
             chatId,
             RegistrationSteps.ASK_CONTACT,
+            "source",
           );
           break;
 
@@ -265,6 +300,7 @@ export class RegistrationService {
             contact,
             chatId,
             RegistrationSteps.FINISHED,
+            "contact",
           );
           break;
 
@@ -273,6 +309,7 @@ export class RegistrationService {
             ZodAny,
             chatId,
             RegistrationSteps.FINISHED,
+            "contact",
           );
 
           break;
