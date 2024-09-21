@@ -12,7 +12,7 @@ export class UserDb {
         userId,
       },
     });
-  } 
+  }
 
   async getUser(userId: number) {
     return await prisma.user.findUnique({
@@ -27,7 +27,7 @@ export class UserDb {
       where: {
         userId,
       },
-      data
+      data,
     });
   }
 
@@ -38,37 +38,59 @@ export class UserDb {
     const user = await prisma.user.findUnique({
       where: {
         userId: chatId,
-      }
-    })
-    return await prisma.teamMember.create({
-      
+      },
+    });
+    const teamMember = await prisma.teamMember.create({
       data: {
         userData: data,
         user: {
           connect: {
             id: user?.id,
-          }
-        }
-      }
-
-    })
+          },
+        },
+      },
+    });
+    return teamMember;
   }
 
   async getTeamMember(userId: number) {
     const user = await prisma.user.findUnique({
       where: {
         userId,
-      }
-    })
-    if(user?.id !== null){
-      return prisma.teamMember.findUnique({
-        where: {
-          userId: user!.id,
-        }
-      })
-    } else {
+      },
+    });
+    const teamMember = await prisma.teamMember.findUnique({
+      where: {
+        userId: user!.id,
+      },
+    });
+    return teamMember;
+  }
+
+  async getTeamFromDb(chatId: number) {
+    const teamMember = await this.getTeamMember(chatId);
+    if (teamMember === null) {
       return null;
+    } else {
+      const team = await prisma.team.findUnique({
+        where: {
+          id: teamMember.teamId!,
+        },
+      });
+      return team;
     }
-  
+  }
+
+  async getTeamMembers(chatId: number) {
+    const team = await this.getTeamFromDb(chatId);
+    const teamID = team?.id;
+
+    const members = await prisma.teamMember.findMany({
+      where: {
+        teamId: teamID,
+      },
+    });
+
+    return members;
   }
 }
