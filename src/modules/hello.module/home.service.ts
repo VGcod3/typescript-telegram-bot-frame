@@ -13,6 +13,8 @@ import {
   testTaskText,
 } from "../../sharedText";
 import { prisma } from "../../db.utils/prisma.client";
+import { JsonObject } from "@prisma/client/runtime/library";
+import { Prisma } from "@prisma/client";
 
 export class HomeService {
   private readonly UserDb: UserDb;
@@ -171,12 +173,22 @@ export class HomeService {
   async getTeamInfo(chatId: number) {
     const team = await this.UserDb.getTeamFromDb(chatId);
     const teamName = team?.name;
-    const teamId = team?.id;
     const teamMembers = await this.UserDb.getTeamMembers(chatId);
-    const teamMemberNames = teamMembers.map((member) => {
-      return `${member.userData} \n`
-    })
-    return `Ім\'я команди: ${teamName} \n Члени команди: \n ${teamMemberNames} \n`;
+
+    const teamMemberInfo = () => {
+      return teamMembers
+        .map((member) => {
+          const userData = member.userData as Prisma.JsonObject;
+          if (userData && typeof userData === "object") {
+            const { name, surname, contact } = userData;
+            return `- ${name} ${surname} <a href="tel:${contact}">${contact}</a>`;
+          }
+          return "Unknown Member";
+        })
+        .join("\n");
+    };
+
+    return `Ім'я команди: <b>${teamName}</b>\nЧлени команди: <b>\n${teamMemberInfo()}</b>\n`;
   }
 
   private async handleTeam(message: MessageType) {
@@ -192,7 +204,7 @@ export class HomeService {
     } else {
       console.log("enter team info");
       await this.sceneNavigator.setScene(chatId, SceneEnum.TeamInfo);
-      const teamInfo = await this.getTeamInfo(chatId)
+      const teamInfo = await this.getTeamInfo(chatId);
       await this.sendLocalStageKeyboard(
         chatId,
         "інформація про команду: \n" + teamInfo,
