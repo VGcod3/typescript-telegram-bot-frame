@@ -115,8 +115,14 @@ export class RegistrationService {
         if (contact) {
           this.updateTeamMemberField(chatId, fieldName, contact.phone_number);
         } else if (text === "Поділитися нікнеймом") {
-          
           this.updateTeamMemberField(chatId, fieldName, message.chat.username);
+        }else{
+          await this.sender.sendText(chatId, "Скористайтесь однією з кнопок, щоб поширити свої контактні дані");
+          this.sessionManager.updateRegistrationStep(
+            chatId,
+            RegistrationSteps.ASK_CONTACT,
+          );
+          return;
         }
 
         const teamMemberData = { ...this.temporaryData.get(chatId) };
