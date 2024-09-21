@@ -3,7 +3,16 @@ import { UserDb } from "../../db.utils/user.utils";
 import { SceneNavigator } from "../../../SceneNavigator";
 import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
-import { aboutBestText, aboutChatText, aboutEventText, locationText, rulesText, startMessage, testTaskText } from "../../sharedText";
+import {
+  aboutBestText,
+  aboutChatText,
+  aboutEventText,
+  locationText,
+  rulesText,
+  startMessage,
+  testTaskText,
+} from "../../sharedText";
+import { prisma } from "../../db.utils/prisma.client";
 
 export class HomeService {
   private readonly UserDb: UserDb;
@@ -39,55 +48,62 @@ export class HomeService {
   async handleKeyboard(message: MessageType) {
     const chatId = message.chat.id;
     const teamMember = await this.UserDb.getTeamMember(chatId);
-    const availableScenes = await this.sceneNavigator.getAvailableNextScenes(chatId, teamMember);
+    const availableScenes = await this.sceneNavigator.getAvailableNextScenes(
+      chatId,
+      teamMember,
+    );
     const enteredText = message.text;
-  
+
     if (enteredText === "Назад") {
       await this.sceneNavigator.goBack(chatId);
     }
-  
+
     if (!availableScenes.includes(enteredText as SceneEnum)) {
       await this.sender.sendText(chatId, "Такого варіанту не існує");
       await this.sendLocalStageKeyboard(chatId, startMessage);
     }
-  
+
     if (enteredText === "Реєстрація" && !teamMember) {
       await this.handleRegistration(chatId);
     }
     await this.sceneNavigator.setScene(chatId, enteredText as SceneEnum);
-  
+
     if (teamMember) {
       await this.handleSceneByText(enteredText, message);
     }
   }
-  
+
   private async handleRegistration(chatId: number) {
     this.sceneNavigator.setScene(chatId, "Реєстрація" as SceneEnum);
     return this.sender.sendKeyboard(
       chatId,
       "Перед початком реєстрації підтвердьте дозвіл на обробку ваших даних",
       [[{ text: "Почати реєстрацію" }], [{ text: "Назад" }]],
-      true
+      true,
     );
   }
-  
-  private handleSceneByText(text: string, message: MessageType) {
+
+  private async handleSceneByText(text: string, message: MessageType) {
     switch (text) {
       case "Місце проведення":
-        return this.handleLocation(message);
+        this.handleLocation(message);
+        break;
       case "Правила івенту":
-        return this.handleRules(message);
+        this.handleRules(message);
+        break;
       case "Тестове завдання":
-        return this.handleTestTask(message);
+        this.handleTestTask(message);
+        break;
       case "Чат":
-        return this.handleChat(message);
+        this.handleChat(message);
+        break;
       case "Інформація про команду":
-        return this.handleTeam(message);
+        await this.handleTeam(message);
+        break;
       default:
         break;
     }
   }
-  
 
   async handleUsers(message: MessageType) {
     const chatId = message.chat.id;
@@ -135,31 +151,52 @@ export class HomeService {
     const chatId = message.chat.id;
     this.sender.sendText(chatId, aboutEventText);
   }
-  handleLocation(message: MessageType) {
+  private handleLocation(message: MessageType) {
     const chatId = message.chat.id;
     this.sender.sendText(chatId, locationText);
   }
-  handleChat(message: MessageType) {
+  private handleChat(message: MessageType) {
     const chatId = message.chat.id;
     this.sender.sendText(chatId, aboutChatText);
   }
-  handleTestTask(message: MessageType) {
+  private handleTestTask(message: MessageType) {
     const chatId = message.chat.id;
     this.sender.sendText(chatId, testTaskText);
   }
 
-  handleRules(message: MessageType) {
+  private handleRules(message: MessageType) {
     const chatId = message.chat.id;
     this.sender.sendText(chatId, rulesText);
   }
+  async getTeamInfo(chatId: number) {
+    const team = await this.UserDb.getTeamFromDb(chatId);
+    const teamName = team?.name;
+    const teamId = team?.id;
+    const teamMembers = await this.UserDb.getTeamMembers(chatId);
+    const teamMemberNames = teamMembers.map((member) => {
+      return `${member.userData} \n`
+    })
+    return `Ім\'я команди: ${teamName} \n Члени команди: \n ${teamMemberNames} \n`;
+  }
 
-  async handleTeam(message: MessageType) {
+  private async handleTeam(message: MessageType) {
     const chatId = message.chat.id;
-    const team = await this.UserDb.getTeamMember(chatId);
-    if (team?.teamId === null) {
-      this.sender.sendText(chatId, "Ви ще не в команді");
-      // await this.sceneNavigator.setScene(chatId, SceneEnum.NewTeam);
-      await this.sendLocalStageKeyboard(chatId, "Виберіть дію");
+    const teamMember = await this.UserDb.getTeamMember(chatId);
+    if (teamMember?.teamId === null) {
+      await this.sceneNavigator.setScene(chatId, SceneEnum.TeamHandle);
+      console.log("enter team handle");
+      await this.sendLocalStageKeyboard(
+        chatId,
+        "У вас немає команди, але ви можете це виправити =)",
+      );
+    } else {
+      console.log("enter team info");
+      await this.sceneNavigator.setScene(chatId, SceneEnum.TeamInfo);
+      const teamInfo = await this.getTeamInfo(chatId)
+      await this.sendLocalStageKeyboard(
+        chatId,
+        "інформація про команду: \n" + teamInfo,
+      );
     }
   }
 }
