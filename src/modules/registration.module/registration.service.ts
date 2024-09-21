@@ -201,7 +201,9 @@ export class RegistrationService {
 
       switch (currentStep) {
         case RegistrationSteps.ASK_NAME:
-          await this.sender.sendKeyboard(chatId, "Введіть ваше ім'я", [[]]);
+          await this.sender.sendKeyboard(chatId, "Введіть ваше ім'я", [
+            [{ text: BACK }],
+          ]);
           await this.handleUserInput(
             name,
             chatId,
@@ -211,7 +213,9 @@ export class RegistrationService {
           break;
 
         case RegistrationSteps.ASK_SURNAME:
-          await this.sender.sendKeyboard(chatId, "Введіть ваше прізвище", [[]]);
+          await this.sender.sendKeyboard(chatId, "Введіть ваше прізвище", [
+            [{ text: BACK }],
+          ]);
           await this.handleUserInput(
             surname,
             chatId,
@@ -221,7 +225,9 @@ export class RegistrationService {
           break;
 
         case RegistrationSteps.ASK_AGE:
-          await this.sender.sendKeyboard(chatId, "Введіть ваш вік", [[]]);
+          await this.sender.sendKeyboard(chatId, "Введіть ваш вік", [
+            [{ text: BACK }],
+          ]);
           await this.handleUserInput(
             age,
             chatId,
@@ -235,7 +241,10 @@ export class RegistrationService {
           await this.sender.sendKeyboard(
             chatId,
             "Введіть ваш університет",
-            [[{ text: "НУЛП" }, { text: "ЛНУ" }, { text: "НЛУУ" }]],
+            [
+              [{ text: "НУЛП" }, { text: "ЛНУ" }, { text: "НЛУУ" }],
+              [{ text: BACK }],
+            ],
             true,
           );
           await this.handleUserInput(
@@ -263,6 +272,7 @@ export class RegistrationService {
             [
               [{ text: "1" }, { text: "2" }, { text: "3" }],
               [{ text: "4" }, { text: "5" }, { text: "6" }],
+              [{ text: BACK }],
             ],
             true,
           );
@@ -276,7 +286,7 @@ export class RegistrationService {
           break;
 
         case RegistrationSteps.ASK_SOURCE:
-          await this.sender.sendText(chatId, "Як ви дізналися про нас?");
+          await this.sender.sendKeyboard(chatId, "Як ви дізналися про нас?", [[{ text: BACK }]],);
           await this.handleUserInput(
             source,
             chatId,
@@ -289,7 +299,7 @@ export class RegistrationService {
           await this.sender.sendKeyboard(
             chatId,
             "Поіділться буль ласка номером телефону",
-            [[{ text: "Поділитися номером", request_contact: true }]],
+            [[{ text: "Поділитися номером", request_contact: true }], [{ text: BACK }],],
             true,
           );
           await this.handleUserInput(
