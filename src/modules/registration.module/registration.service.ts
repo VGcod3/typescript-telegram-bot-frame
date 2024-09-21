@@ -73,48 +73,48 @@ export class RegistrationService {
     schema: any,
     chatId: number,
     nextStep: RegistrationSteps,
-    isNumber = false,
+    isNumber = false
   ) {
     this.bot.once("message", async (message: MessageType) => {
-      if (message.chat.id !== chatId) {
+      if (message.chat.id !== chatId) return;
+  
+      const { text, contact } = message;
+      const phoneNumber = contact?.phone_number;
+  
+      if (isNumber && text) {
+        const number = Number(text);
+        const validationResult = schema.safeParse(number);
+        if (!validationResult.success) {
+          await this.sender.sendText(chatId, validationResult.error.errors[0]?.message);
+          return;
+        }
+  
+        this.temporaryData.get(chatId)?.push(number);
+        await this.setUserStep(chatId, nextStep);
         return;
       }
-      const text = message.text;
-      const contact = message.contact?.phone_number;
-      if (isNumber) {
-        const number = Number(text);
-        if (!schema.safeParse(number).success) {
-          await this.sender.sendText(
-            chatId,
-            `${schema.safeParse(number).error.errors[0]?.message}`,
-          );
-          return;
-        } else {
-          this.temporaryData.get(chatId)?.push(number);
-          await this.setUserStep(chatId, nextStep);
-        }
-      } else if (contact !== undefined) {
-        console.log("Contact: " + contact);
-        this.temporaryData.get(chatId)?.push(contact);
+  
+      if (phoneNumber) {
+        this.temporaryData.get(chatId)?.push(phoneNumber);
         await this.handleFinishStep(chatId);
-        await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
         await this.sender.sendText(chatId, "Дякуємо за реєстрацію");
-
         await this.sendLocalStageKeyboard(chatId, startMessage);
-      } else {
-        if (!schema.safeParse(text).success) {
-          await this.sender.sendText(
-            chatId,
-            `${schema.safeParse(text).error.errors[0]?.message}`,
-          );
+        return;
+      }
+  
+      if (text) {
+        const validationResult = schema.safeParse(text);
+        if (!validationResult.success) {
+          await this.sender.sendText(chatId, validationResult.error.errors[0]?.message);
           return;
-        } else {
-          this.temporaryData.get(chatId)?.push(text);
-          await this.setUserStep(chatId, nextStep);
         }
+  
+        this.temporaryData.get(chatId)?.push(text);
+        await this.setUserStep(chatId, nextStep);
       }
     });
   }
+  
   async getUserStep(chatId: number): Promise<RegistrationSteps> {
     const userSession = await this.sessionManager.getSession(chatId);
     if (!userSession.data.registrationStep) {
@@ -152,12 +152,14 @@ export class RegistrationService {
   }
 
   private async handleFinishStep(chatId: number) {
+    
     await this.UserDb.createTeamMember(chatId, this.temporaryData.get(chatId));
     this.sessionManager.updateRegistrationStep(
       chatId,
       RegistrationSteps.FINISHED,
     );
     this.temporaryData.delete(chatId);
+    await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
   }
 
   async collectData(message: MessageType) {
