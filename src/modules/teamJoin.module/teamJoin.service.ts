@@ -5,7 +5,7 @@ import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
 import { prisma } from "../../db.utils/prisma.client";
 import { objectIdSchema } from "../../z.schemas/schema.ObjectID";
-import { Team } from "@prisma/client";
+import { BACK } from "../../sharedText";
 
 export class TeamJoinService {
   private readonly UserDb: UserDb;
@@ -25,7 +25,7 @@ export class TeamJoinService {
     const chatId = message.chat.id;
     const enteredText = message.text;
 
-    if (enteredText === "Назад") {
+    if (enteredText === BACK) {
       this.sceneNavigator.goBack(chatId);
       this.sendLocalStageKeyboard(chatId, "Оберіть дію");
     } else {
@@ -40,8 +40,6 @@ export class TeamJoinService {
         this.sendLocalStageKeyboard(chatId, "Оберіть дію");
       }
     }
-
-    
   }
 
   private async joinTeam(teamId: string, chatId: number) {
@@ -66,9 +64,9 @@ export class TeamJoinService {
       } else {
         const members = await prisma.teamMember.findMany({
           where: {
-            teamId: teamId
-          }
-        })
+            teamId: teamId,
+          },
+        });
 
         if (members.length >= 5) {
           await this.sender.sendText(chatId, "Команда вже заповнена");
@@ -119,7 +117,7 @@ export class TeamJoinService {
 
     const canGoBack = !!currentScene.prevScene;
     const allButtons = canGoBack
-      ? [...scenesButtons, { text: "Назад" }]
+      ? [...scenesButtons, { text: BACK }]
       : scenesButtons;
 
     const keyboardButtons = this.chunkArray(allButtons, 2);

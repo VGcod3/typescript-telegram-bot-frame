@@ -66,7 +66,7 @@ export class TeamCreateService {
     const chatId = message.chat.id;
     const enteredText = message.text;
 
-    if (enteredText === "Назад") {
+    if (enteredText === BACK) {
       await this.sceneNavigator.goBack(chatId);
       await this.sendLocalStageKeyboard(chatId, "Оберіть дію");
     } else {
@@ -94,7 +94,7 @@ export class TeamCreateService {
 
     const canGoBack = !!currentScene.prevScene;
     const allButtons = canGoBack
-      ? [...scenesButtons, { text: "Назад" }]
+      ? [...scenesButtons, { text: BACK }]
       : scenesButtons;
 
     const keyboardButtons = this.chunkArray(allButtons, 2);

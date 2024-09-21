@@ -23,12 +23,12 @@ export class TeamInfoService {
     const chatId = message.chat.id;
     const enteredText = message.text;
 
-    if (enteredText === "Назад") {
+    if (enteredText === BACK) {
       this.sceneNavigator.goBack(chatId);
     } else if (message.text === "Вийти з команди") {
       await this.exitFromTeam(chatId);
       await this.sender.sendText(chatId, "Ви вийшли з команди!");
-      await this.sceneNavigator.setScene(chatId, SceneEnum.Home)
+      await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
     } else {
       await this.sender.sendText(chatId, "Такого варіанту не існує");
     }
@@ -79,7 +79,7 @@ export class TeamInfoService {
 
     const canGoBack = !!currentScene.prevScene;
     const allButtons = canGoBack
-      ? [...scenesButtons, { text: "Назад" }]
+      ? [...scenesButtons, { text: BACK }]
       : scenesButtons;
 
     const keyboardButtons = this.chunkArray(allButtons, 2);

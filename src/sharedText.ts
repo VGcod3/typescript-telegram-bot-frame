@@ -34,7 +34,7 @@ export const aboutEventText = `
 export const locationText = `
 <b>Місце проведення:</b>
 Місце проведення таке то таке то
-`
+`;
 
 export const aboutChatText = `
 Все ще шукаєш команду?
@@ -67,3 +67,5 @@ export const rulesText = `
 6) Погоджуючись з правилами, учасники дають згоду на обробку їх персональних даних.
 
 `;
+
+export const BACK = "Назад";

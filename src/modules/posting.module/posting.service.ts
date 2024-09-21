@@ -10,7 +10,7 @@ export class PostingService {
     private readonly UserDb: UserDb,
     private readonly sender: Sender,
     private readonly sceneNavigator: SceneNavigator,
-    private readonly sessionManager: SessionManager
+    private readonly sessionManager: SessionManager,
   ) {
     this.UserDb = UserDb;
     this.sender = sender;
@@ -36,7 +36,7 @@ export class PostingService {
     const availableSceneNames =
       await this.sceneNavigator.getAvailableNextScenes(chatId);
 
-    if (message.text === "Назад") {
+    if (message.text === BACK) {
       this.sceneNavigator.goBack(chatId);
     } else if (availableSceneNames.includes(message.text as SceneEnum)) {
       this.sceneNavigator.setScene(chatId, message.text as SceneEnum);
@@ -58,7 +58,7 @@ export class PostingService {
     await this.sender.sendKeyboard(chatId, "Виберіть дію", [
       availableScenesNames.map((scene) => ({ text: scene })),
 
-      canGoBack ? [{ text: "Назад" }] : [],
+      canGoBack ? [{ text: BACK }] : [],
     ]);
   }
 }

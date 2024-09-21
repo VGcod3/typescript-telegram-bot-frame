@@ -3,6 +3,7 @@ import { UserDb } from "../../db.utils/user.utils";
 import { SceneNavigator } from "../../../SceneNavigator";
 import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
+import { BACK } from "../../sharedText";
 
 export class TeamHandleService {
   private readonly UserDb: UserDb;
@@ -22,13 +23,12 @@ export class TeamHandleService {
     const chatId = message.chat.id;
     const enteredText = message.text;
     const availableScenes = await this.sceneNavigator.getAvailableNextScenes(
-      chatId, 
+      chatId,
     );
 
-    if (enteredText === "Назад") {
+    if (enteredText === BACK) {
       this.sceneNavigator.goBack(chatId);
       await this.sendLocalStageKeyboard(chatId, "Оберіть дію");
-  
     }
     if (availableScenes.includes(enteredText as SceneEnum)) {
       this.sceneNavigator.setScene(chatId, enteredText as SceneEnum);
@@ -39,8 +39,7 @@ export class TeamHandleService {
         await this.sendLocalStageKeyboard(chatId, "Оберіть назву команди");
       }
     }
-
-    }
+  }
 
   private chunkArray<T>(arr: T[], size: number): T[][] {
     const result: T[][] = [];
@@ -62,7 +61,7 @@ export class TeamHandleService {
 
     const canGoBack = !!currentScene.prevScene;
     const allButtons = canGoBack
-      ? [...scenesButtons, { text: "Назад" }]
+      ? [...scenesButtons, { text: BACK }]
       : scenesButtons;
 
     const keyboardButtons = this.chunkArray(allButtons, 2);

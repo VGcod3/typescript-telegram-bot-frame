@@ -15,7 +15,7 @@ import {
   name,
 } from "../../z.schemas/schema.TeamMember";
 import { MessageType, Sender } from "../sender";
-import { startMessage } from "../../sharedText";
+import { BACK, startMessage } from "../../sharedText";
 import { ITeamMemberData } from "../../interfaces/teamMemberData";
 
 export enum RegistrationSteps {
@@ -51,7 +51,7 @@ export class RegistrationService {
     const availableSceneNames =
       await this.sceneNavigator.getAvailableNextScenes(chatId, null);
 
-    if (message.text === "Назад") {
+    if (message.text === BACK) {
       this.sceneNavigator.goBack(chatId);
       this.sessionManager.updateRegistrationStep(
         chatId,
@@ -83,7 +83,6 @@ export class RegistrationService {
       const { text, contact } = message;
       const phoneNumber = contact?.phone_number;
 
-      // Handle number validation
       if (isNumber && text) {
         const number = Number(text);
         const validationResult = schema.safeParse(number);
@@ -96,7 +95,6 @@ export class RegistrationService {
         }
 
         this.updateTeamMemberField(chatId, fieldName, number);
-        console.log(this.temporaryData.get(chatId)![fieldName]);
         await this.setUserStep(chatId, nextStep);
         return;
       }
@@ -106,7 +104,7 @@ export class RegistrationService {
         console.log(this.temporaryData.get(chatId));
         const teamMemberData = { ...this.temporaryData.get(chatId) };
         await this.UserDb.createTeamMember(chatId, teamMemberData);
-      
+
         await this.handleFinishStep(chatId);
         await this.sender.sendText(chatId, "Дякуємо за реєстрацію");
         await this.sendLocalStageKeyboard(chatId, startMessage);
@@ -123,9 +121,7 @@ export class RegistrationService {
           return;
         }
 
-        // Dynamically set the field using bracket notation
         this.updateTeamMemberField(chatId, fieldName, text);
-        console.log(this.temporaryData.get(chatId)![fieldName]);
         await this.setUserStep(chatId, nextStep);
       }
     });
@@ -173,7 +169,7 @@ export class RegistrationService {
 
     const canGoBack = !!currentScene.prevScene;
     const allButtons = canGoBack
-      ? [...scenesButtons, { text: "Назад" }]
+      ? [...scenesButtons, { text: BACK }]
       : scenesButtons;
 
     const keyboardButtons = this.chunkArray(allButtons, 2);

@@ -7,6 +7,7 @@ import {
   aboutBestText,
   aboutChatText,
   aboutEventText,
+  BACK,
   locationText,
   rulesText,
   startMessage,
@@ -56,7 +57,7 @@ export class HomeService {
     );
     const enteredText = message.text;
 
-    if (enteredText === "Назад") {
+    if (enteredText === BACK) {
       await this.sceneNavigator.goBack(chatId);
     }
 
@@ -80,7 +81,7 @@ export class HomeService {
     return this.sender.sendKeyboard(
       chatId,
       "Перед початком реєстрації підтвердьте дозвіл на обробку ваших даних",
-      [[{ text: "Почати реєстрацію" }], [{ text: "Назад" }]],
+      [[{ text: "Почати реєстрацію" }], [{ text: BACK }]],
       true,
     );
   }
@@ -138,7 +139,7 @@ export class HomeService {
 
     const canGoBack = !!currentScene.prevScene;
     const allButtons = canGoBack
-      ? [...scenesButtons, { text: "Назад" }]
+      ? [...scenesButtons, { text: BACK }]
       : scenesButtons;
 
     const keyboardButtons = this.chunkArray(allButtons, 2);
@@ -175,20 +176,27 @@ export class HomeService {
     const teamName = team?.name;
     const teamMembers = await this.UserDb.getTeamMembers(chatId);
 
-    const teamMemberInfo = () => {
-      return teamMembers
-        .map((member) => {
-          const userData = member.userData as Prisma.JsonObject;
-          if (userData && typeof userData === "object") {
-            const { name, surname, contact } = userData;
-            return `- ${name} ${surname} <a href="tel:${contact}">${contact}</a>`;
-          }
-          return "Unknown Member";
-        })
-        .join("\n");
+    const teamInfo = teamMembers
+      .map((member) => {
+        const userData = member.userData as Prisma.JsonObject;
+        if (userData && typeof userData === "object") {
+          const { name, surname, contact } = userData;
+          return `- ${name} ${surname} <a href="tel:${contact}">${contact}</a>`;
+        }
+        return "Unknown Member";
+      })
+      .join("\n");
+
+    const sendTeamInfo = async () => {
+      await this.sendLocalStageKeyboard(
+        chatId,
+        `Ім'я команди: <b>${teamName}</b>\nЧлени команди: <b>\n${teamInfo}</b>\n`,
+      );
+      await this.sender.sendText(chatId, "Id команди: \n");
+      await this.sender.sendText(chatId, team!.id);
     };
 
-    return `Ім'я команди: <b>${teamName}</b>\nЧлени команди: <b>\n${teamMemberInfo()}</b>\n`;
+    await sendTeamInfo();
   }
 
   private async handleTeam(message: MessageType) {
@@ -204,11 +212,7 @@ export class HomeService {
     } else {
       console.log("enter team info");
       await this.sceneNavigator.setScene(chatId, SceneEnum.TeamInfo);
-      const teamInfo = await this.getTeamInfo(chatId);
-      await this.sendLocalStageKeyboard(
-        chatId,
-        "інформація про команду: \n" + teamInfo,
-      );
+      await this.getTeamInfo(chatId);
     }
   }
 }

@@ -1,7 +1,8 @@
 import { TelegramBot } from "typescript-telegram-bot-api";
-import { MessageType, Sender } from "../sender";
+import { MessageType } from "../sender";
 import { RegistrationService } from "./registration.service";
 import { BotInstance } from "../../../BotInstance";
+import { BACK } from "../../sharedText";
 
 export class RegistrationController {
   private readonly bot: TelegramBot;
@@ -13,15 +14,13 @@ export class RegistrationController {
 
     this.bot.on("message:text", async (message) => {
       await this.handleTextMessage(message);
-    }
-    );
+    });
   }
 
   public async handleTextMessage(message: MessageType) {
-    if (message.text !== "Назад" ) {
+    if (message.text !== BACK) {
       this.registrationService.collectData(message);
-    }
-    else {
+    } else {
       this.registrationService.handleKeyboard(message);
     }
   }
