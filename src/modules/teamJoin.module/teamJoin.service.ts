@@ -67,6 +67,15 @@ export class TeamJoinService {
         await this.sender.sendText(chatId, "Команду з таким ID не знайдено.");
         return null;
       }
+      const membersCount = await prisma.teamMember.findMany({
+        where: {
+          teamId: teamId
+        }
+      })
+      if(membersCount.length > 5){
+        await this.sender.sendText(chatId, "Команда вже заповнена");
+        return null;
+      }
       const user = await prisma.user.findUnique({
         where: {
           userId: chatId
