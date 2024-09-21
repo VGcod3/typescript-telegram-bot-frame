@@ -42,9 +42,6 @@ export class HomeService {
     const availableScenes = await this.sceneNavigator.getAvailableNextScenes(chatId, teamMember);
     const enteredText = message.text;
   
-    console.log(`Home Available scenes: ${availableScenes}`);
-    console.log(`Home Entered text: ${enteredText}`);
-  
     if (enteredText === "Назад") {
       await this.sceneNavigator.goBack(chatId);
     }

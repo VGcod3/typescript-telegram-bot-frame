@@ -54,7 +54,7 @@ export class SceneNavigator {
     }
   }
 
-  public async getAvailableNextScenes(chatId: number, teamMember: any,): Promise<SceneEnum[]> {
+  public async getAvailableNextScenes(chatId: number, teamMember: any = null,): Promise<SceneEnum[]> {
     const session = this.sessions.get(chatId);
 
     if (!session) {
@@ -66,12 +66,11 @@ export class SceneNavigator {
  
 
     if (currentScene.name === SceneEnum.Home && teamMember !== null) {
-      console.log("teamMember");
       return [
         SceneEnum.AboutBest,
         SceneEnum.AboutCTF,
         SceneEnum.EventLocation,
-        SceneEnum.Team,
+        SceneEnum.TeamInfo,
         SceneEnum.EventChat,
         SceneEnum.TestTask,
         SceneEnum.EventRules,
@@ -106,7 +105,7 @@ export class SceneNavigator {
 
   private async enterModuleScene(chatId: number) {
     const currentScene = await this.getCurrentScene(chatId);
-
+    
     const bot = BotInstance.getInstance();
 
     bot.removeAllListeners();

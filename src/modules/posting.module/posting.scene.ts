@@ -7,7 +7,6 @@ import { PostingService } from "./posting.service";
 
 export class PostingScene {
   public static enter() {
-    console.log("Posting scene entered");
 
     const userDb = new UserDb();
     const sender = new Sender();
