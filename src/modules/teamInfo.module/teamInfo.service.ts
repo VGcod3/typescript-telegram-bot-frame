@@ -4,6 +4,7 @@ import { SceneNavigator } from "../../../SceneNavigator";
 import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
 import { prisma } from "../../db.utils/prisma.client";
+import { BACK } from "../../sharedText";
 
 export class TeamInfoService {
   private readonly UserDb: UserDb;
