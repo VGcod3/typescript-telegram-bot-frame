@@ -40,7 +40,7 @@ export class UserDb {
         userId: chatId,
       },
     });
-    const teamMember = await prisma.teamMember.create({
+    await prisma.teamMember.create({
       data: {
         userData: data,
         user: {
@@ -50,7 +50,6 @@ export class UserDb {
         },
       },
     });
-    return teamMember;
   }
 
   async getTeamMember(userId: number) {

@@ -77,12 +77,19 @@ export class RegistrationService {
     fieldName: keyof ITeamMemberData, // Dynamically pass the field name
     isNumber = false,
   ) {
+    // Clear any previous listeners for the same chat ID
+    this.bot.removeAllListeners("message");
+
     this.bot.once("message", async (message: MessageType) => {
       if (message.chat.id !== chatId) return;
 
       const { text, contact } = message;
-      const phoneNumber = contact?.phone_number;
 
+      if (text === BACK) {
+        return;
+      }
+
+      // Handle number input validation
       if (isNumber && text) {
         const number = Number(text);
         const validationResult = schema.safeParse(number);
@@ -99,9 +106,19 @@ export class RegistrationService {
         return;
       }
 
-      if (phoneNumber) {
-        this.updateTeamMemberField(chatId, fieldName, phoneNumber);
-        console.log(this.temporaryData.get(chatId));
+      // Handle contact input
+      if (fieldName === "contact") {
+        this.sessionManager.updateRegistrationStep(
+          chatId,
+          RegistrationSteps.FINISHED,
+        );
+        if (contact) {
+          this.updateTeamMemberField(chatId, fieldName, contact.phone_number);
+        } else if (text === "Поділитися нікнеймом") {
+          
+          this.updateTeamMemberField(chatId, fieldName, message.chat.username);
+        }
+
         const teamMemberData = { ...this.temporaryData.get(chatId) };
         await this.UserDb.createTeamMember(chatId, teamMemberData);
 
@@ -111,6 +128,7 @@ export class RegistrationService {
         return;
       }
 
+      // Handle text input validation
       if (text) {
         const validationResult = schema.safeParse(text);
         if (!validationResult.success) {
@@ -178,10 +196,7 @@ export class RegistrationService {
   }
 
   private async handleFinishStep(chatId: number) {
-    this.sessionManager.updateRegistrationStep(
-      chatId,
-      RegistrationSteps.FINISHED,
-    );
+    
     this.temporaryData.delete(chatId);
     await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
   }
@@ -286,7 +301,9 @@ export class RegistrationService {
           break;
 
         case RegistrationSteps.ASK_SOURCE:
-          await this.sender.sendKeyboard(chatId, "Як ви дізналися про нас?", [[{ text: BACK }]],);
+          await this.sender.sendKeyboard(chatId, "Як ви дізналися про нас?", [
+            [{ text: BACK }],
+          ]);
           await this.handleUserInput(
             source,
             chatId,
@@ -298,8 +315,13 @@ export class RegistrationService {
         case RegistrationSteps.ASK_CONTACT:
           await this.sender.sendKeyboard(
             chatId,
-            "Поіділться буль ласка номером телефону",
-            [[{ text: "Поділитися номером", request_contact: true }], [{ text: BACK }],],
+            "Будь ласка, залиште свої контакти:",
+            [
+              [{ text: "Поділитися номером", request_contact: true }],
+              [{ text: "Поділитися нікнеймом" }],
+
+              [{ text: BACK }],
+            ],
             true,
           );
           await this.handleUserInput(
