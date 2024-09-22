@@ -36,7 +36,7 @@ export class TeamHandleService {
         await this.sendLocalStageKeyboard(chatId, "Оберіть назву команди");
       }
       if (enteredText === "Приєднатися до команди") {
-        await this.sendLocalStageKeyboard(chatId, "Оберіть назву команди");
+        await this.sendLocalStageKeyboard(chatId, "Введіть ID команди");
       }
     }
   }
