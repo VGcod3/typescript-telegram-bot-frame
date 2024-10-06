@@ -7,10 +7,11 @@ import { TeamJoinScene } from "./src/modules/teamJoin.module/teamJoin.scene";
 export enum SceneEnum {
   Home = "home",
   Registration = "Реєстрація",
-  AboutBest = "Про бест",
+  AboutBest = "Про BEST",
   AboutCTF = "Про івент",
   EventLocation = "Місце проведення",
-  EventChat = "Чат",
+  ParticipantsChat = "Чат для учасників",
+  WithoutTeamsChat = "Чат пошуку команди",
   TestTask = "Тестове завдання",
   EventRules = "Правила івенту",
   TeamInfo = "Інформація про команду",
