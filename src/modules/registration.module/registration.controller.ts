@@ -13,13 +13,18 @@ export class RegistrationController {
     this.bot = BotInstance.getInstance();
 
     this.bot.on("message:text", async (message) => {
-      await this.handleTextMessage(message);
+      this.handleTextMessage(message);
+    });
+    this.bot.on("message:contact", async (message) => {
+      this.registrationService.handlePhoneNumber(message);
     });
   }
 
   public async handleTextMessage(message: MessageType) {
-    if (message.text !== BACK) {
-      this.registrationService.collectData(message);
+    if (message.text === "/start") {
+      this.registrationService.handleStart(message);
+    } else if (message.text !== BACK) {
+      this.registrationService.handleRegistration(message);
     } else {
       this.registrationService.handleKeyboard(message);
     }

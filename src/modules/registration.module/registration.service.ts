@@ -1,34 +1,19 @@
-import { set, ZodAny, ZodString } from "zod";
-import { BotInstance } from "../../../BotInstance";
 import { SceneNavigator } from "../../../SceneNavigator";
 import { SceneEnum } from "../../../scenesList";
 import { SessionManager } from "../../../SessionManager";
 import { UserDb } from "../../db.utils/user.utils";
 import {
   age,
-  surname,
   university,
   group,
-  course,
   source,
-  contact,
   name,
+  contact,
+  course,
 } from "../../z.schemas/schema.TeamMember";
 import { MessageType, Sender } from "../sender";
 import { BACK, startMessage } from "../../sharedText";
-import { ITeamMemberData } from "../../interfaces/teamMemberData";
-
-export enum RegistrationSteps {
-  ASK_NAME = "ask_name",
-  ASK_AGE = "ask_age",
-  ASK_SURNAME = "ask_surname",
-  ASK_UNIVERSITY = "ask_university",
-  ASK_GROUP = "ask_group",
-  ASK_COURSE = "ask_course",
-  ASK_SOURCE = "ask_source",
-  ASK_CONTACT = "ask_contact",
-  FINISHED = "finished",
-}
+import { Contact, Message } from "typescript-telegram-bot-api/dist/types";
 
 export class RegistrationService {
   constructor(
@@ -42,23 +27,33 @@ export class RegistrationService {
     this.sessionManager = sessionManager;
     this.sceneNavigator = sceneNavigator;
   }
+  async handleStart(message: MessageType) {
+    const chatId = message.chat.id;
+    await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+    await this.sessionManager.initSession(chatId);
+    const user = await this.UserDb.getUser(chatId);
+    const teamMember = await this.UserDb.getTeamMember(chatId);
 
-  private bot = BotInstance.getInstance();
-  public temporaryData = new Map<number, ITeamMemberData>() as any;
+    if (teamMember || user) {
+      await this.sender.sendText(chatId, "Радий знову тебе бачити!");
+    } else {
+      await this.UserDb.createUser(chatId);
+      await this.sender.sendText(chatId, "Ласкаво просимо, студенте!");
+    }
 
+    await this.sendLocalStageKeyboard(chatId, startMessage);
+  }
   async handleKeyboard(message: MessageType) {
     const chatId = message.chat.id;
+    const enteredText = message.text;
     const availableSceneNames =
-      await this.sceneNavigator.getAvailableNextScenes(chatId, null);
+      await this.sceneNavigator.getAvailableNextScenes(chatId);
 
-    if (message.text === BACK) {
+    if (enteredText === BACK) {
+      await this.sessionManager.updateRegistrationSteps(chatId, "name");
       this.sceneNavigator.goBack(chatId);
-      this.sessionManager.updateRegistrationStep(
-        chatId,
-        RegistrationSteps.ASK_NAME,
-      );
-    } else if (availableSceneNames.includes(message.text as SceneEnum)) {
-      this.sceneNavigator.setScene(chatId, message.text as SceneEnum);
+    } else if (availableSceneNames.includes(enteredText as SceneEnum)) {
+      await this.sceneNavigator.setScene(chatId, enteredText as SceneEnum);
     } else {
       await this.sender.sendText(chatId, "Такого варіанту не існує");
     }
@@ -66,126 +61,259 @@ export class RegistrationService {
     await this.sendLocalStageKeyboard(chatId, startMessage);
   }
 
-  async setUserStep(chatId: number, step: RegistrationSteps) {
-    console.log("Setting step: " + step);
-    this.sessionManager.updateRegistrationStep(chatId, step);
+  async handleRegistration(message: MessageType) {
+    const chatId = message.chat.id;
+    const enteredText = message.text;
+    const session = await this.sessionManager.getSession(chatId);
+    if (session.data.registrationStep === undefined)
+      await this.sessionManager.updateRegistrationSteps(chatId, "name");
+
+    const step = (await this.sessionManager.getSession(chatId)).data
+      .registrationStep;
+    console.log("Step by " + message.from?.username + ": " + step);
+
+    if (await this.validateRegistrationStep(step, enteredText, chatId, message))
+      await this.handleRegistrationStep(step, chatId, enteredText);
   }
-  async handleUserInput(
-    schema: any,
+
+  private async validateRegistrationStep(
+    step: string,
+    enteredText: any,
     chatId: number,
-    nextStep: RegistrationSteps,
-    fieldName: keyof ITeamMemberData, // Dynamically pass the field name
-    isNumber = false,
+    message?: MessageType,
+  ): Promise<boolean> {
+    // Define the schema based on the current step
+    let schema;
+    console.log(
+      "Entered text by " + message?.from?.username + ": " + enteredText,
+    );
+    switch (step) {
+      case "name":
+        schema = name;
+        break;
+
+      case "age":
+        schema = age;
+        enteredText = Number(enteredText);
+        break;
+      case "university":
+        schema = university;
+        break;
+      case "group":
+        schema = group;
+        break;
+      case "course":
+        schema = course;
+        enteredText = Number(enteredText);
+        break;
+      case "source":
+        schema = source;
+        break;
+      case "contact":
+        schema = contact;
+
+        if (enteredText === "Нікнейм" || enteredText === BACK) {
+          await this.saveUserDataFiledToDB(step, chatId, enteredText, message);
+          return true;
+        } else {
+          await this.sender.sendKeyboardHTML(
+            chatId,
+            "Будь-ласка скористайтеся доступними кнопками для взаємодії",
+            [
+              [{ text: "Номер телефону" }],
+              [{ text: "Нікнейм" }],
+              [{ text: BACK }],
+            ],
+          );
+          return false;
+        }
+    }
+
+    // Validate the entered text using the selected schema
+    const parsed = schema!.safeParse(enteredText);
+
+    // If validation fails, return the error message
+    if (!parsed.success) {
+      await this.sender.sendText(chatId, parsed.error.errors[0].message);
+      return false;
+    }
+
+    // If validation succeeds, return null (no error)
+    await this.saveUserDataFiledToDB(step, chatId, enteredText);
+    return true;
+  }
+  private async saveUserDataFiledToDB(
+    step: string,
+    chatId: number,
+    enteredText: string,
+    message?: MessageType,
   ) {
-    // Clear any previous listeners for the same chat ID
-    this.bot.removeAllListeners("message");
+    switch (step) {
+      case "name":
+        await this.sessionManager.updateUserInfo(chatId, { name: enteredText });
+        break;
 
-    this.bot.once("message", async (message: MessageType) => {
-      if (message.chat.id !== chatId) return;
+      case "age":
+        await this.sessionManager.updateUserInfo(chatId, { age: enteredText });
 
-      const { text, contact } = message;
+        break;
+      case "university":
+        await this.sessionManager.updateUserInfo(chatId, {
+          university: enteredText,
+        });
 
-      if (text === BACK) {
-        return;
-      }
+        break;
+      case "group":
+        await this.sessionManager.updateUserInfo(chatId, {
+          group: enteredText,
+        });
 
-      // Handle number input validation
-      if (isNumber && text) {
-        const number = Number(text);
-        const validationResult = schema.safeParse(number);
-        if (!validationResult.success) {
-          await this.sender.sendText(
-            chatId,
-            validationResult.error.errors[0]?.message,
-          );
-          return;
+        break;
+      case "course":
+        await this.sessionManager.updateUserInfo(chatId, {
+          course: enteredText,
+        });
+
+        break;
+      case "source":
+        await this.sessionManager.updateUserInfo(chatId, {
+          source: enteredText,
+        });
+
+        break;
+      case "contact":
+        if (enteredText === "Нікнейм") {
+          await this.sessionManager.updateUserInfo(chatId, {
+            contact: "@" + message?.from?.username,
+          });
         }
 
-        this.updateTeamMemberField(chatId, fieldName, number);
-        await this.setUserStep(chatId, nextStep);
-        return;
-      }
-
-      // Handle contact input
-      if (fieldName === "contact") {
-        this.sessionManager.updateRegistrationStep(
-          chatId,
-          RegistrationSteps.FINISHED,
-        );
-        if (contact) {
-          this.updateTeamMemberField(chatId, fieldName, contact.phone_number);
-        } else if (text === "Поділитися нікнеймом") {
-          this.updateTeamMemberField(chatId, fieldName, message.chat.username);
-        }else{
-          await this.sender.sendText(chatId, "Скористайтесь однією з кнопок, щоб поширити свої контактні дані");
-          this.sessionManager.updateRegistrationStep(
-            chatId,
-            RegistrationSteps.ASK_CONTACT,
-          );
-          return;
-        }
-
-        const teamMemberData = { ...this.temporaryData.get(chatId) };
-        await this.UserDb.createTeamMember(chatId, teamMemberData);
-
-        await this.handleFinishStep(chatId);
-        await this.sender.sendText(chatId, "Дякуємо за реєстрацію");
-        await this.sendLocalStageKeyboard(chatId, startMessage);
-        return;
-      }
-
-      // Handle text input validation
-      if (text) {
-        const validationResult = schema.safeParse(text);
-        if (!validationResult.success) {
-          await this.sender.sendText(
-            chatId,
-            validationResult.error.errors[0]?.message,
-          );
-          return;
-        }
-
-        this.updateTeamMemberField(chatId, fieldName, text);
-        await this.setUserStep(chatId, nextStep);
-      }
-    });
+        break;
+    }
   }
-
-  updateTeamMemberField = <K extends keyof ITeamMemberData>(
+  private async handleRegistrationStep(
+    step: string,
     chatId: number,
-    field: K,
-    value: any,
-  ) => {
-    const member = this.temporaryData.get(chatId);
+    enteredText?: string,
+  ) {
+    switch (step) {
+      case "name":
+        await this.sessionManager.updateRegistrationSteps(chatId, "age");
+        await this.sender.sendKeyboardHTML(chatId, "Введіть вік", [
+          [{ text: BACK }],
+        ]);
+        break;
 
-    if (member) {
-      member[field] = value;
+      case "age":
+        await this.sessionManager.updateRegistrationSteps(chatId, "university");
+        await this.sender.sendKeyboardHTML(chatId, "Введіть університет", [
+          [
+            { text: "НУЛП" },
+            { text: "ЛНУ" },
+            { text: "КПІ" },
+            { text: "Ще в школі" },
+          ],
+          [{ text: BACK }],
+        ]);
+        break;
+      case "university":
+        if (enteredText === "Ще в школі") {
+          await this.sessionManager.updateUserInfo(chatId, { group: "XX-00" });
+          await this.sessionManager.updateUserInfo(chatId, { course: 0 });
 
-      this.temporaryData.set(chatId, member);
+          await this.sessionManager.updateRegistrationSteps(chatId, "source");
+
+          await this.sender.sendKeyboardHTML(
+            chatId,
+            "Введіть звідки ви дізналися про нас",
+            [
+              [{ text: "Соц. мережі" }],
+              [{ text: "Спільноти в соц. мережах" }],
+              [{ text: "На інших івентах" }],
+              [{ text: "Інфостійки" }],
+              [{ text: "Від друзів" }],
+              [{ text: "Від викладачів " }],
+              [{ text: "Оголошення на сайтах" }],
+              [{ text: BACK }],
+            ],
+          );
+        } else {
+          await this.sessionManager.updateRegistrationSteps(chatId, "group");
+          await this.sender.sendKeyboardHTML(
+            chatId,
+            "Введіть Вашу спеціальність",
+            [[{ text: BACK }]],
+          );
+        }
+
+        break;
+      case "group":
+        await this.sessionManager.updateRegistrationSteps(chatId, "course");
+        await this.sender.sendKeyboardHTML(chatId, "Який Ви курс", [
+          [{ text: "1" }, { text: "2" }],
+          [{ text: "3" }, { text: "4" }],
+          [{ text: "5" }, { text: "6" }],
+          [{ text: BACK }],
+        ]);
+        break;
+      case "course":
+        await this.sessionManager.updateRegistrationSteps(chatId, "source");
+        await this.sender.sendKeyboardHTML(
+          chatId,
+          "Введіть звідки ви дізналися про нас",
+          [
+            [{ text: "Соц. мережі" }],
+            [{ text: "Спільноти в соц. мережах" }],
+            [{ text: "На інших івентах" }],
+            [{ text: "Інфостійки" }],
+            [{ text: "Від друзів" }],
+            [{ text: "Від викладачів " }],
+            [{ text: "Оголошення на сайтах" }],
+            [{ text: BACK }],
+          ],
+        );
+        break;
+      case "source":
+        await this.sessionManager.updateRegistrationSteps(chatId, "contact");
+        await this.sender.sendKeyboardHTML(
+          chatId,
+          "Поділіться своїми контактами",
+          [
+            [{ text: "Номер телефону", request_contact: true }],
+            [{ text: "Нікнейм" }],
+            [{ text: BACK }],
+          ],
+        );
+        break;
+      case "contact":
+        const userData = (await this.sessionManager.getSession(chatId)).data
+          .userInfo;
+        await this.UserDb.createTeamMember(chatId, userData);
+        await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+        await this.sendLocalStageKeyboard(chatId, "Дякую за реєстрацію");
+
+        break;
     }
-  };
-
-  async getUserStep(chatId: number): Promise<RegistrationSteps> {
-    const userSession = await this.sessionManager.getSession(chatId);
-    if (!userSession.data.registrationStep) {
-      await this.setUserStep(chatId, RegistrationSteps.ASK_NAME);
-    }
-    return userSession.data.registrationStep;
-  }
-
-  private chunkArray<T>(arr: T[], size: number): T[][] {
-    const result: T[][] = [];
-    for (let i = 0; i < arr.length; i += size) {
-      result.push(arr.slice(i, i + size));
-    }
-    return result;
   }
   private async sendLocalStageKeyboard(chatId: number, text: string) {
+    let availableScenesNames: SceneEnum[];
     const currentScene = await this.sceneNavigator.getCurrentScene(chatId);
     const teamMember = await this.UserDb.getTeamMember(chatId);
-    console.log(teamMember);
-    const availableScenesNames =
-      await this.sceneNavigator.getAvailableNextScenes(chatId, teamMember);
+
+    availableScenesNames = await this.sceneNavigator.getAvailableNextScenes(
+      chatId,
+      teamMember,
+    );
+
+    if (teamMember !== null) {
+      availableScenesNames = [
+        SceneEnum.AboutBest,
+        SceneEnum.AboutCTF,
+        SceneEnum.TeamInfo,
+        SceneEnum.WithoutTeamsChat,
+        SceneEnum.TestTask,
+      ];
+    }
 
     const scenesButtons = availableScenesNames.map((scene) => ({
       text: scene,
@@ -198,156 +326,27 @@ export class RegistrationService {
 
     const keyboardButtons = this.chunkArray(allButtons, 2);
 
-    await this.sender.sendKeyboard(chatId, text, keyboardButtons);
+    await this.sender.sendKeyboardHTML(chatId, text, keyboardButtons);
   }
-
-  private async handleFinishStep(chatId: number) {
-    
-    this.temporaryData.delete(chatId);
-    await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+  private chunkArray<T>(arr: T[], size: number): T[][] {
+    const result: T[][] = [];
+    for (let i = 0; i < arr.length; i += size) {
+      result.push(arr.slice(i, i + size));
+    }
+    return result;
   }
-
-  async collectData(message: MessageType) {
+  public async handlePhoneNumber(message: Message) {
     const chatId = message.chat.id;
-    const teamMember = await this.UserDb.getTeamMember(chatId);
-
-    const currentStep = await this.getUserStep(chatId);
-    if (teamMember !== null) {
-      await this.sender.sendText(chatId, "Ви вже зареєстровані");
-      return;
-    } else {
-      if (!this.temporaryData.has(chatId)) {
-        this.temporaryData.set(chatId, []);
-      }
-
-      switch (currentStep) {
-        case RegistrationSteps.ASK_NAME:
-          await this.sender.sendKeyboard(chatId, "Введіть ваше ім'я", [
-            [{ text: BACK }],
-          ]);
-          await this.handleUserInput(
-            name,
-            chatId,
-            RegistrationSteps.ASK_SURNAME,
-            "name",
-          );
-          break;
-
-        case RegistrationSteps.ASK_SURNAME:
-          await this.sender.sendKeyboard(chatId, "Введіть ваше прізвище", [
-            [{ text: BACK }],
-          ]);
-          await this.handleUserInput(
-            surname,
-            chatId,
-            RegistrationSteps.ASK_AGE,
-            "surname",
-          );
-          break;
-
-        case RegistrationSteps.ASK_AGE:
-          await this.sender.sendKeyboard(chatId, "Введіть ваш вік", [
-            [{ text: BACK }],
-          ]);
-          await this.handleUserInput(
-            age,
-            chatId,
-            RegistrationSteps.ASK_UNIVERSITY,
-            "age",
-            true,
-          );
-          break;
-
-        case RegistrationSteps.ASK_UNIVERSITY:
-          await this.sender.sendKeyboard(
-            chatId,
-            "Введіть ваш університет",
-            [
-              [{ text: "НУЛП" }, { text: "ЛНУ" }, { text: "НЛУУ" }],
-              [{ text: BACK }],
-            ],
-            true,
-          );
-          await this.handleUserInput(
-            university,
-            chatId,
-            RegistrationSteps.ASK_GROUP,
-            "university",
-          );
-          break;
-
-        case RegistrationSteps.ASK_GROUP:
-          await this.sender.sendText(chatId, "Введіть вашу групу");
-          await this.handleUserInput(
-            group,
-            chatId,
-            RegistrationSteps.ASK_COURSE,
-            "group",
-          );
-          break;
-
-        case RegistrationSteps.ASK_COURSE:
-          await this.sender.sendKeyboard(
-            chatId,
-            "Введіть ваш курс",
-            [
-              [{ text: "1" }, { text: "2" }, { text: "3" }],
-              [{ text: "4" }, { text: "5" }, { text: "6" }],
-              [{ text: BACK }],
-            ],
-            true,
-          );
-          await this.handleUserInput(
-            course,
-            chatId,
-            RegistrationSteps.ASK_SOURCE,
-            "course",
-            true,
-          );
-          break;
-
-        case RegistrationSteps.ASK_SOURCE:
-          await this.sender.sendKeyboard(chatId, "Як ви дізналися про нас?", [
-            [{ text: BACK }],
-          ]);
-          await this.handleUserInput(
-            source,
-            chatId,
-            RegistrationSteps.ASK_CONTACT,
-            "source",
-          );
-          break;
-
-        case RegistrationSteps.ASK_CONTACT:
-          await this.sender.sendKeyboard(
-            chatId,
-            "Будь ласка, залиште свої контакти:",
-            [
-              [{ text: "Поділитися номером", request_contact: true }],
-              [{ text: "Поділитися нікнеймом" }],
-
-              [{ text: BACK }],
-            ],
-            true,
-          );
-          await this.handleUserInput(
-            contact,
-            chatId,
-            RegistrationSteps.FINISHED,
-            "contact",
-          );
-          break;
-
-        case RegistrationSteps.FINISHED:
-          await this.handleUserInput(
-            ZodAny,
-            chatId,
-            RegistrationSteps.FINISHED,
-            "contact",
-          );
-
-          break;
-      }
+    if (chatId !== message.chat.id) return;
+    const step = (await this.sessionManager.getSession(chatId)).data
+      .registrationStep;
+    const currentScene = (await this.sceneNavigator.getCurrentScene(chatId))
+      .name;
+    if (currentScene === SceneEnum.Registration && step === "contact") {
+      await this.sessionManager.updateUserInfo(chatId, {
+        contact: message?.contact?.phone_number,
+      });
+      await this.handleRegistrationStep(step, chatId);
     }
   }
 }
