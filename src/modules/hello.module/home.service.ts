@@ -36,9 +36,11 @@ export class HomeService {
     await this.sessionManager.initSession(chatId);
     await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
 
-    await this.sender.sendText(chatId, "Ласкаво просимо, студенте!");
-
-    await this.sendLocalStageKeyboard(chatId, startMessage);
+    await this.sendLocalStageKeyboard(
+      chatId,
+      startMessage,
+      "/public/hello.png",
+    );
   }
   async handleKeyboard(message: MessageType) {
     const chatId = message.chat.id;
@@ -80,9 +82,11 @@ export class HomeService {
         break;
       case "Реєстрація":
         await this.sceneNavigator.setScene(chatId, SceneEnum.Registration);
+
         await this.sendLocalStageKeyboard(
           chatId,
           "Введіть Ваше ім'я та прізвище",
+          "/public/registration.png",
         );
     }
   }
@@ -96,7 +100,7 @@ export class HomeService {
         this.handleTestTask(chatId);
         break;
       case "Чат для пошуку команди":
-        this.handleChat(chatId);
+        this.handleFindTeamChat(chatId);
         break;
       case "Про івент":
         this.handleAboutCTF(chatId);
@@ -118,7 +122,7 @@ export class HomeService {
         this.handleRules(chatId);
         break;
       case "Чат для учасників":
-        this.handleChat(chatId);
+        this.handleParticipantsChat(chatId);
         break;
       case "Інформація про команду":
         this.handleTeam(message);
@@ -137,7 +141,7 @@ export class HomeService {
       await this.sceneNavigator.setScene(chatId, SceneEnum.TeamHandle);
       await this.sendLocalStageKeyboard(
         chatId,
-        `У вас немає команди, але ви можете це виправити =)\nЯкщо наразі Ви не маєте напарників, то ласкаво просимо до <a href="google.com">нашого чату!</a>`,
+        `У вас немає команди, але ви можете це виправити =)\nЯкщо наразі Ви не маєте напарників, то ласкаво просимо до <a href="https://t.me/+2gH_DUtVhyY3Njli">нашого чату!</a>`,
       );
     } else {
       await this.sceneNavigator.setScene(chatId, SceneEnum.TeamInfo);
@@ -166,7 +170,7 @@ export class HomeService {
   private async sendLocalStageKeyboard(
     chatId: number,
     text: string,
-    MarkdownV2: boolean = false,
+    url: string = "",
   ) {
     const currentScene = await this.sceneNavigator.getCurrentScene(chatId);
     const teamMember = await this.UserDb.getTeamMember(chatId);
@@ -188,29 +192,36 @@ export class HomeService {
       : scenesButtons;
 
     const keyboardButtons = this.chunkArray(allButtons, 2);
-    if (!MarkdownV2)
+    if (url === "")
       await this.sender.sendKeyboardHTML(chatId, text, keyboardButtons);
     else {
-      await this.sender.sendKeyboardMARKDOWN(chatId, text, keyboardButtons);
+      await this.sender.sendPhotoWithKeyBoard(
+        chatId,
+        url,
+        text,
+        keyboardButtons,
+      );
     }
   }
 
   private handleAboutBest(chatId: number) {
-    this.sender.sendText(chatId, aboutBestText);
+    this.sender.sendPhoto(chatId, "/public/aboutBest.png", aboutBestText);
   }
   handleAboutCTF(chatId: number) {
-    this.sender.sendText(chatId, aboutEventText);
+    this.sender.sendPhoto(chatId, "/public/aboutCTF.png", aboutEventText);
   }
   private handleLocation(chatId: number) {
     this.sender.sendText(chatId, locationText);
   }
-  private handleChat(chatId: number) {
-    this.sender.sendText(chatId, aboutChatText);
+  private handleParticipantsChat(chatId: number) {
+    this.sender.sendText(chatId, "посилання");
   }
   private handleTestTask(chatId: number) {
-    this.sender.sendText(chatId, testTaskText);
+    this.sender.sendPhoto(chatId, "/public/test.png", testTaskText);
   }
-
+  private handleFindTeamChat(chatId: number) {
+    this.sender.sendText(chatId, aboutChatText);
+  }
   private handleRules(chatId: number) {
     this.sender.sendText(chatId, rulesText);
   }
