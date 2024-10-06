@@ -29,17 +29,10 @@ export class RegistrationService {
   }
   async handleStart(message: MessageType) {
     const chatId = message.chat.id;
-    await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
     await this.sessionManager.initSession(chatId);
-    const user = await this.UserDb.getUser(chatId);
-    const teamMember = await this.UserDb.getTeamMember(chatId);
+    await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
 
-    if (teamMember || user) {
-      await this.sender.sendText(chatId, "Радий знову тебе бачити!");
-    } else {
-      await this.UserDb.createUser(chatId);
-      await this.sender.sendText(chatId, "Ласкаво просимо, студенте!");
-    }
+    await this.sender.sendText(chatId, "Ласкаво просимо, студенте!");
 
     await this.sendLocalStageKeyboard(chatId, startMessage);
   }

@@ -35,19 +35,11 @@ export class HomeService {
     const chatId = message.chat.id;
     await this.sessionManager.initSession(chatId);
     await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
-    const user = await this.UserDb.getUser(chatId);
-    const teamMember = await this.UserDb.getTeamMember(chatId);
 
-    if (teamMember || user) {
-      await this.sender.sendText(chatId, "Радий знову тебе бачити!");
-    } else {
-      await this.UserDb.createUser(chatId);
-      await this.sender.sendText(chatId, "Ласкаво просимо, студенте!");
-    }
+    await this.sender.sendText(chatId, "Ласкаво просимо, студенте!");
 
     await this.sendLocalStageKeyboard(chatId, startMessage);
   }
-
   async handleKeyboard(message: MessageType) {
     const chatId = message.chat.id;
     const teamMember = await this.UserDb.getTeamMember(chatId);
