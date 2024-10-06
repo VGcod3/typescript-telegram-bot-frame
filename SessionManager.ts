@@ -1,7 +1,6 @@
 import { SceneEnum } from "./scenesList";
 import { SessionStorageType, UserSessionStorage } from "./SessionsStorage";
 import { UserDb } from "./src/db.utils/user.utils";
-import { RegistrationSteps } from "./src/modules/registration.module/registration.service";
 
 export interface UserSession {
   currentScene: SceneEnum;
@@ -25,14 +24,45 @@ export class SessionManager {
 
     this.userDb.updateUser(chatId, data);
   }
-  public updateRegistrationStep(chatId: number, step: RegistrationSteps) {
-    const session = this.sessions.get(chatId)!;
 
-    session.data.registrationStep = step;
-
-    this.sessions.set(chatId, session);
-    this.userDb.updateUser(chatId, session);
+  public async updateRegistrationSteps(
+    chatId: number,
+    registrationStep: string,
+  ) {
+    const sessionData = await this.getSession(chatId);
+    await this.setSessionData(chatId, {
+      ...sessionData,
+      data: {
+        ...sessionData.data,
+        registrationStep: registrationStep,
+      },
+    });
   }
+  public async updateUserInfo(chatId: number, newUserInfo: any) {
+    const sessionData = await this.getSession(chatId);
+
+    const updatedUserInfo = {
+      ...sessionData?.data?.userInfo,
+      ...newUserInfo,
+    };
+
+    await this.setSessionData(chatId, {
+      ...sessionData,
+      data: {
+        ...sessionData.data,
+        userInfo: updatedUserInfo,
+      },
+    });
+  }
+  public async setSessionData(chatId: number, data: any) {
+    const session = await this.getSession(chatId);
+    if (!session) {
+      await this.initSession(chatId);
+    }
+
+    this.sessions.set(chatId, data);
+  }
+
   public async loadSessionsFromDb() {
     const users = await this.userDb.getAllUsers();
 
@@ -47,9 +77,7 @@ export class SessionManager {
   public async initSession(chatId: number) {
     const sessionData = {
       currentScene: SceneEnum.Home,
-      data: {
-        registrationStep: RegistrationSteps.ASK_NAME
-      },
+      data: {},
     };
 
     this.sessions.set(chatId, sessionData);
