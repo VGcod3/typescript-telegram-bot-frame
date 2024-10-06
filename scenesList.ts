@@ -11,7 +11,7 @@ export enum SceneEnum {
   AboutCTF = "Про івент",
   EventLocation = "Місце проведення",
   ParticipantsChat = "Чат для учасників",
-  WithoutTeamsChat = "Чат пошуку команди",
+  WithoutTeamsChat = "Чат для пошуку команди",
   TestTask = "Тестове завдання",
   EventRules = "Правила івенту",
   TeamInfo = "Інформація про команду",
