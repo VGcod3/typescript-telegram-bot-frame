@@ -5,7 +5,7 @@ import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
 import { prisma } from "../../db.utils/prisma.client";
 import { objectIdSchema } from "../../z.schemas/schema.ObjectID";
-import { BACK } from "../../sharedText";
+import { BACK, startMessage } from "../../sharedText";
 
 export class TeamJoinService {
   private readonly UserDb: UserDb;
@@ -24,7 +24,7 @@ export class TeamJoinService {
   async handleKeyboard(message: MessageType) {
     const chatId = message.chat.id;
     const enteredText = message.text;
-
+    
     if (enteredText === BACK) {
       this.sceneNavigator.goBack(chatId);
       this.sendLocalStageKeyboard(chatId, "Оберіть дію");
@@ -32,12 +32,11 @@ export class TeamJoinService {
       try {
         await this.joinTeam(enteredText, chatId);
       } catch (error) {
-        await this.sender.sendText(
+        await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+        await this.sendLocalStageKeyboard(
           chatId,
           "Сталася помилка. Спробуйте ще раз пізніше.",
         );
-        await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
-        this.sendLocalStageKeyboard(chatId, "Оберіть дію");
       }
     }
   }
@@ -46,7 +45,8 @@ export class TeamJoinService {
     const parsedData = objectIdSchema.safeParse(teamId);
 
     if (!parsedData.success) {
-      await this.sender.sendText(
+      await this.sceneNavigator.setScene(chatId, SceneEnum.TeamHandle);
+      await this.sendLocalStageKeyboard(
         chatId,
         `Помилка: ${parsedData.error.errors[0].message}`,
       );
@@ -59,8 +59,11 @@ export class TeamJoinService {
       });
 
       if (!team) {
-        await this.sender.sendText(chatId, "Команду з таким ID не знайдено.");
         await this.sceneNavigator.setScene(chatId, SceneEnum.TeamHandle);
+        await this.sendLocalStageKeyboard(
+          chatId,
+          "Команду з таким ID не знайдено.",
+        );
       } else {
         const members = await prisma.teamMember.findMany({
           where: {
@@ -72,8 +75,6 @@ export class TeamJoinService {
           await this.sender.sendText(chatId, "Команда вже заповнена");
           await this.sceneNavigator.setScene(chatId, SceneEnum.TeamHandle);
         } else {
-          await this.sender.sendText(chatId, "Ви приєдналися до команди!");
-
           const user = await prisma.user.findUnique({
             where: {
               userId: chatId,
@@ -88,10 +89,13 @@ export class TeamJoinService {
             },
           });
           await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+          await this.sendLocalStageKeyboard(
+            chatId,
+            "Ви приєдналися до команди!",
+          );
         }
       }
     } catch (error) {
-      await this.sender.sendText(chatId, "Сталася помилка при пошуку команди.");
       await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
       await this.sendLocalStageKeyboard(
         chatId,
@@ -111,8 +115,10 @@ export class TeamJoinService {
     } else {
       await this.UserDb.createUser(chatId);
       await this.sender.sendText(chatId, "Ласкаво просимо, студенте!");
-  }
+    }
 
+    await this.sendLocalStageKeyboard(chatId, startMessage);
+  }
   private chunkArray<T>(arr: T[], size: number): T[][] {
     const result: T[][] = [];
     for (let i = 0; i < arr.length; i += size) {

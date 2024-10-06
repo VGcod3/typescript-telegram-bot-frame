@@ -4,7 +4,7 @@ import { SceneNavigator } from "../../../SceneNavigator";
 import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
 import { prisma } from "../../db.utils/prisma.client";
-import { BACK } from "../../sharedText";
+import { BACK, startMessage } from "../../sharedText";
 
 export class TeamCreateService {
   private readonly UserDb: UserDb;
@@ -42,9 +42,8 @@ export class TeamCreateService {
         name: teamName,
       },
     });
-    console.log(existTeam.length);
     if (existTeam.length > 0) {
-      this.sender.sendText(
+      await this.sendLocalStageKeyboard(
         chatId,
         "Дана назва вже зайнята. Введіть назву ще раз",
       );
@@ -68,17 +67,15 @@ export class TeamCreateService {
           teamId: newTeam.id,
         },
       });
-      await this.sender.sendText(
+
+      await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+      await this.sendLocalStageKeyboard(
         chatId,
         `Команда створена\\! Щоб до неї приєдналися інші учасники, поділіться ID вашої команди: \`${this.escapeMarkdown(
           newTeam!.id.toString(),
         )}\``,
         true,
       );
-      await this.sender.sendText(chatId, newTeam.id);
-
-      await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
-      await this.sendLocalStageKeyboard(chatId, "Оберіть дію:");
     }
   }
   private escapeMarkdown(text: string | undefined): string {
@@ -103,12 +100,20 @@ export class TeamCreateService {
     }
     return result;
   }
-  private async sendLocalStageKeyboard(chatId: number, text: string) {
+  private async sendLocalStageKeyboard(
+    chatId: number,
+    text: string,
+    MarkdownV2: boolean = false,
+  ) {
     const currentScene = await this.sceneNavigator.getCurrentScene(chatId);
     const teamMember = await this.UserDb.getTeamMember(chatId);
-
+    const isAprooved = (await this.UserDb.getTeamFromDb(chatId))?.isAprooved;
     const availableScenesNames =
-      await this.sceneNavigator.getAvailableNextScenes(chatId, teamMember);
+      await this.sceneNavigator.getAvailableNextScenes(
+        chatId,
+        teamMember,
+        isAprooved,
+      );
 
     const scenesButtons = availableScenesNames.map((scene) => ({
       text: scene,

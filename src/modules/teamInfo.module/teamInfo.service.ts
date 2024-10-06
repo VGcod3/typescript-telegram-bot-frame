@@ -4,7 +4,7 @@ import { SceneNavigator } from "../../../SceneNavigator";
 import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
 import { prisma } from "../../db.utils/prisma.client";
-import { BACK } from "../../sharedText";
+import { BACK, startMessage } from "../../sharedText";
 
 export class TeamInfoService {
   private readonly UserDb: UserDb;
@@ -41,15 +41,14 @@ export class TeamInfoService {
 
     if (enteredText === BACK) {
       this.sceneNavigator.goBack(chatId);
+      await this.sendLocalStageKeyboard(chatId, "Оберіть дію");
     } else if (message.text === "Вийти з команди") {
       await this.exitFromTeam(chatId);
-      await this.sender.sendText(chatId, "Ви вийшли з команди!");
+      await this.sendLocalStageKeyboard(chatId, "Ви вийшли з команди!");
       await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
     } else {
-      await this.sender.sendText(chatId, "Такого варіанту не існує");
+      await this.sendLocalStageKeyboard(chatId, "Такого варіанту не існує");
     }
-
-    await this.sendLocalStageKeyboard(chatId, "Оберіть дію");
   }
 
   async exitFromTeam(chatId: number) {
@@ -85,9 +84,13 @@ export class TeamInfoService {
   private async sendLocalStageKeyboard(chatId: number, text: string) {
     const currentScene = await this.sceneNavigator.getCurrentScene(chatId);
     const teamMember = await this.UserDb.getTeamMember(chatId);
-
+    const teamAprooved = (await this.UserDb.getTeamFromDb(chatId))?.isAprooved;
     const availableScenesNames =
-      await this.sceneNavigator.getAvailableNextScenes(chatId, teamMember);
+      await this.sceneNavigator.getAvailableNextScenes(
+        chatId,
+        teamMember,
+        teamAprooved,
+      );
 
     const scenesButtons = availableScenesNames.map((scene) => ({
       text: scene,
