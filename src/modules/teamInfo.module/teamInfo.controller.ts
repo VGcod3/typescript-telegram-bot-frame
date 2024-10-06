@@ -17,6 +17,8 @@ export class TeamInfoController {
   }
 
   public async handleTextMessage(message: MessageType) {
-    await this.teamInfoService.handleKeyboard(message);
+    if (message.text === "/start") {
+      await this.teamInfoService.handleStart(message);
+    } else await this.teamInfoService.handleKeyboard(message);
   }
 }

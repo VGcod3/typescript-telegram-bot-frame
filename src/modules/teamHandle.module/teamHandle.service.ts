@@ -3,7 +3,7 @@ import { UserDb } from "../../db.utils/user.utils";
 import { SceneNavigator } from "../../../SceneNavigator";
 import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
-import { BACK } from "../../sharedText";
+import { BACK, startMessage } from "../../sharedText";
 
 export class TeamHandleService {
   private readonly UserDb: UserDb;
@@ -40,7 +40,22 @@ export class TeamHandleService {
       }
     }
   }
+  async handleStart(message: MessageType) {
+    const chatId = message.chat.id;
+    await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+    await this.sessionManager.initSession(chatId);
+    const user = await this.UserDb.getUser(chatId);
+    const teamMember = await this.UserDb.getTeamMember(chatId);
 
+    if (teamMember || user) {
+      await this.sender.sendText(chatId, "Радий знову тебе бачити!");
+    } else {
+      await this.UserDb.createUser(chatId);
+      await this.sender.sendText(chatId, "Ласкаво просимо, студенте!");
+    }
+
+    await this.sendLocalStageKeyboard(chatId, startMessage);
+  }
   private chunkArray<T>(arr: T[], size: number): T[][] {
     const result: T[][] = [];
     for (let i = 0; i < arr.length; i += size) {

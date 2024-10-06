@@ -93,8 +93,24 @@ export class TeamJoinService {
     } catch (error) {
       await this.sender.sendText(chatId, "Сталася помилка при пошуку команди.");
       await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+      await this.sendLocalStageKeyboard(
+        chatId,
+        "Сталася помилка при пошуку команди.",
+      );
     }
-    await this.sendLocalStageKeyboard(chatId, "Оберіть дію");
+  }
+  async handleStart(message: MessageType) {
+    const chatId = message.chat.id;
+    await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+    await this.sessionManager.initSession(chatId);
+    const user = await this.UserDb.getUser(chatId);
+    const teamMember = await this.UserDb.getTeamMember(chatId);
+
+    if (teamMember || user) {
+      await this.sender.sendText(chatId, "Радий знову тебе бачити!");
+    } else {
+      await this.UserDb.createUser(chatId);
+      await this.sender.sendText(chatId, "Ласкаво просимо, студенте!");
   }
 
   private chunkArray<T>(arr: T[], size: number): T[][] {

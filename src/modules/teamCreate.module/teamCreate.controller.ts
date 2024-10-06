@@ -17,6 +17,8 @@ export class TeamCreateController {
   }
 
   public async handleTextMessage(message: MessageType) {
-    this.teamCreateService.handleKeyboard(message);
+    if (message.text === "/start") {
+      await this.teamCreateService.handleStart(message);
+    } else this.teamCreateService.handleKeyboard(message);
   }
 }

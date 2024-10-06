@@ -17,6 +17,10 @@ export class TeamJoinController {
   }
 
   public async handleTextMessage(message: MessageType) {
-    await this.teamJoinService.handleKeyboard(message);
+    if (message.text === "/start") {
+      await this.teamJoinService.handleStart(message);
+    } else {
+      await this.teamJoinService.handleKeyboard(message);
+    }
   }
 }
