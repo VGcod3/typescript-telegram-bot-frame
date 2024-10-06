@@ -23,7 +23,17 @@ export class Sender {
       parse_mode: "HTML",
     });
   }
-
+  async sendTextMARKDOWN(
+    chatId: number,
+    text: string,
+    one_time_keyboard = false,
+  ) {
+    await this.bot.sendMessage({
+      chat_id: chatId,
+      text,
+      parse_mode: "MarkdownV2",
+    });
+  }
   async sendSticker(chatId: number, sticker: string) {
     await this.bot.sendSticker({
       chat_id: chatId,
@@ -31,7 +41,7 @@ export class Sender {
     });
   }
 
-  async sendKeyboard(
+  async sendKeyboardHTML(
     chatId: number,
     text: string,
     keyboard: KeyboardButton[][],
@@ -48,4 +58,23 @@ export class Sender {
       },
     });
   }
+
+  async sendKeyboardMARKDOWN(
+    chatId: number,
+    text: string,
+    keyboard: KeyboardButton[][],
+    one_time_keyboard = false,
+  ) {
+    await this.bot.sendMessage({
+      chat_id: chatId,
+      text,
+      parse_mode: "MarkdownV2",
+      reply_markup: {
+        keyboard,
+        one_time_keyboard: one_time_keyboard,
+        resize_keyboard: true,
+      },
+    });
+  }
+
 }

@@ -3,6 +3,7 @@ import { SceneEnum } from "../../../scenesList";
 import { SessionManager } from "../../../SessionManager";
 
 import { UserDb } from "../../db.utils/user.utils";
+import { BACK } from "../../sharedText";
 import { MessageType, Sender } from "../sender";
 
 export class PostingService {
@@ -55,7 +56,7 @@ export class PostingService {
 
     const canGoBack = !!currentScene.prevScene;
 
-    await this.sender.sendKeyboard(chatId, "Виберіть дію", [
+    await this.sender.sendKeyboardHTML(chatId, "Виберіть дію", [
       availableScenesNames.map((scene) => ({ text: scene })),
 
       canGoBack ? [{ text: BACK }] : [],

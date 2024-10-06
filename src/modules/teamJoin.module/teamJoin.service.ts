@@ -121,6 +121,6 @@ export class TeamJoinService {
       : scenesButtons;
 
     const keyboardButtons = this.chunkArray(allButtons, 2);
-    await this.sender.sendKeyboard(chatId, text, keyboardButtons);
+    await this.sender.sendKeyboardHTML(chatId, text, keyboardButtons);
   }
 }

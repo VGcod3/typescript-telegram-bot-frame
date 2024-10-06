@@ -54,7 +54,10 @@ export class TeamCreateService {
       });
       await this.sender.sendText(
         chatId,
-        "Команда створена! Щоб до неї приєдналися інші учасники, поділіться ID вашої команди: ",
+        `Команда створена\\! Щоб до неї приєдналися інші учасники, поділіться ID вашої команди: \`${this.escapeMarkdown(
+          newTeam!.id.toString(),
+        )}\``,
+        true,
       );
       await this.sender.sendText(chatId, newTeam.id);
 
@@ -62,7 +65,9 @@ export class TeamCreateService {
       await this.sendLocalStageKeyboard(chatId, "Оберіть дію:");
     }
   }
-
+  private escapeMarkdown(text: string | undefined): string {
+    return text?.replace(/([_*[\]()~`>#+\-=|{}.!])/g, "\\$1") || "";
+  }
   async handleKeyboard(message: MessageType) {
     const chatId = message.chat.id;
     const enteredText = message.text;
@@ -99,6 +104,10 @@ export class TeamCreateService {
       : scenesButtons;
 
     const keyboardButtons = this.chunkArray(allButtons, 2);
-    await this.sender.sendKeyboard(chatId, text, keyboardButtons);
+    if (!MarkdownV2)
+      await this.sender.sendKeyboardHTML(chatId, text, keyboardButtons);
+    else {
+      await this.sender.sendKeyboardMARKDOWN(chatId, text, keyboardButtons);
+    }
   }
 }
