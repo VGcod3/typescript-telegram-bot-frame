@@ -4,6 +4,8 @@ import {
   KeyboardButton,
   Message,
 } from "typescript-telegram-bot-api/dist/types";
+import * as fs from "fs";
+import path from "path";
 
 export type MessageType = NonNullable<
   Message & Required<Pick<Message, "text">>
@@ -76,5 +78,51 @@ export class Sender {
       },
     });
   }
+  async sendPhoto(chatId: number, filePath: string, caption?: string) {
+    // Use __dirname to ensure you're working within the project folder
+    const relativeFilePath = path.join(__dirname, filePath); // This will work with your project folder
 
+    // Check if the file exists before proceeding
+    if (!fs.existsSync(relativeFilePath)) {
+      throw new Error(`File not found: ${relativeFilePath}`);
+    }
+
+    // Create a stream for the file and send it via the bot
+    const photoStream = fs.createReadStream(relativeFilePath);
+
+    await this.bot.sendPhoto({
+      chat_id: chatId,
+      photo: photoStream, // Pass the file stream
+      caption: caption,
+      parse_mode: "HTML",
+    });
+  }
+  async sendPhotoWithKeyBoard(
+    chatId: number,
+    filePath: string,
+    caption: string,
+    KeyboardButtons: KeyboardButton[][],
+  ) {
+    const relativeFilePath = path.join(__dirname, filePath); // This will work with your project folder
+
+    // Check if the file exists before proceeding
+    if (!fs.existsSync(relativeFilePath)) {
+      throw new Error(`File not found: ${relativeFilePath}`);
+    }
+
+    // Create a stream for the file and send it via the bot
+    const photoStream = fs.createReadStream(relativeFilePath);
+
+    await this.bot.sendPhoto({
+      chat_id: chatId,
+      photo: photoStream, // Pass the file stream
+      caption: caption,
+      parse_mode: "HTML",
+      reply_markup: {
+        keyboard: KeyboardButtons,
+        resize_keyboard: true,
+        one_time_keyboard: false
+      },
+    });
+  }
 }
