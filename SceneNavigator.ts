@@ -54,26 +54,35 @@ export class SceneNavigator {
     }
   }
 
-  public async getAvailableNextScenes(chatId: number, teamMember: any = null,): Promise<SceneEnum[]> {
+  public async getAvailableNextScenes(
+    chatId: number,
+    teamMember: any = null,
+    teamAprooved: boolean | undefined = false,
+  ): Promise<SceneEnum[]> {
     const session = this.sessions.get(chatId);
 
     if (!session) {
       await this.sessionManager.initSession(chatId);
-      return this.getAvailableNextScenes(chatId, null);
+      return this.getAvailableNextScenes(chatId, null, false);
     }
 
     const currentScene = await this.getCurrentScene(chatId);
- 
 
-    if (currentScene.name === SceneEnum.Home && teamMember !== null) {
+    if (currentScene.name === SceneEnum.Home && teamAprooved) {
       return [
-        SceneEnum.AboutBest,
         SceneEnum.AboutCTF,
         SceneEnum.EventLocation,
         SceneEnum.TeamInfo,
-        SceneEnum.EventChat,
-        SceneEnum.TestTask,
+        SceneEnum.ParticipantsChat,
         SceneEnum.EventRules,
+      ];
+    } else if (currentScene.name === SceneEnum.Home && teamMember !== null) {
+      return [
+        SceneEnum.AboutBest,
+        SceneEnum.AboutCTF,
+        SceneEnum.TeamInfo,
+        SceneEnum.TestTask,
+        SceneEnum.WithoutTeamsChat,
       ];
     }
 
@@ -105,11 +114,11 @@ export class SceneNavigator {
 
   private async enterModuleScene(chatId: number) {
     const currentScene = await this.getCurrentScene(chatId);
-    
+
     const bot = BotInstance.getInstance();
 
     bot.removeAllListeners();
 
     currentScene.enter();
-}
+  }
 }
