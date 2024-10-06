@@ -84,7 +84,6 @@ export class RegistrationService {
       case "name":
         schema = name;
         break;
-
       case "age":
         schema = age;
         enteredText = Number(enteredText);
@@ -127,7 +126,24 @@ export class RegistrationService {
 
     // If validation fails, return the error message
     if (!parsed.success) {
-      await this.sender.sendText(chatId, parsed.error.errors[0].message);
+      if (step === "course") {
+        await this.sender.sendKeyboardHTML(
+          chatId,
+          parsed.error.errors[0].message,
+          [
+            [{ text: "1" }, { text: "2" }],
+            [{ text: "3" }, { text: "4" }],
+            [{ text: "5" }, { text: "6" }],
+            [{ text: BACK }],
+          ],
+        );
+      } else {
+        await this.sendLocalStageKeyboard(
+          chatId,
+          parsed.error.errors[0].message,
+        );
+      }
+
       return false;
     }
 
