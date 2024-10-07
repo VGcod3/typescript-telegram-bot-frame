@@ -27,7 +27,11 @@ export class AdminService {
       teamMember,
     );
     const enteredText = message.text;
-
+    if (message.text === "/start") {
+      await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+      await this.sendLocalStageKeyboard(chatId, "Оберіть дію");
+      return;
+    }
     if (enteredText === BACK) {
       this.sceneNavigator.goBack(chatId);
       return;
@@ -36,10 +40,11 @@ export class AdminService {
     if (!availableScenes.includes(enteredText as SceneEnum)) {
       this.sender.sendText(chatId, "Такого варіанту не існує");
       return;
+    } else {
+      await this.sceneNavigator.setScene(chatId, enteredText as SceneEnum);
     }
 
-    await this.sceneNavigator.setScene(chatId, enteredText as SceneEnum);
-    await this.sendLocalStageKeyboard(chatId, "Оберіть дію");
+    await this.sendLocalStageKeyboard(chatId, "Всім\nЗареєстрованим\nЗ командою\nУчасникам\n\nТекст html\nТекст markdown\nТекст html + фото\nТекст markdown + фото");
   }
 
   private chunkArray<T>(arr: T[], size: number): T[][] {
