@@ -37,8 +37,8 @@ export class TeamInfoService {
       await this.sendLocalStageKeyboard(chatId, "Оберіть дію");
     } else if (message.text === "Вийти з команди") {
       await this.exitFromTeam(chatId);
-      await this.sendLocalStageKeyboard(chatId, "Ви вийшли з команди!");
       await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+      await this.sendLocalStageKeyboard(chatId, "Ви вийшли з команди!");
     } else {
       await this.sendLocalStageKeyboard(chatId, "Такого варіанту не існує");
     }
