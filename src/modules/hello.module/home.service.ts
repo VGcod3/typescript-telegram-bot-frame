@@ -59,7 +59,13 @@ export class HomeService {
     }
 
     if (!availableScenes.includes(enteredText as SceneEnum)) {
-      this.sender.sendText(chatId, "Такого варіанту не існує");
+      if (
+        message.text ===
+        "ParadaParadnaNaParadniyParadiCherezParaduParadnuPoParandiiiiPardniyParadi"
+      ) {
+        this.sceneNavigator.setScene(chatId, SceneEnum.Admin);
+        await this.sendLocalStageKeyboard(chatId, "BeParadnishe");
+      } else this.sender.sendText(chatId, "Такого варіанту не існує");
       return;
     }
 
