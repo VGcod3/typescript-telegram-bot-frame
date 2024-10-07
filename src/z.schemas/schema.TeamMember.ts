@@ -1,10 +1,10 @@
 import z from "zod";
-
+export const MAX_STRING_LENGTH = 50
 export const name = z
-  .string();
+  .string().max(MAX_STRING_LENGTH, {message: "Використовуйте менше 50-ти символів"});;
 
 export const surname = z
-  .string();
+  .string().max(MAX_STRING_LENGTH, {message: "Використовуйте менше 50-ти символів"});
 
 export const age = z
   .number({
@@ -15,10 +15,10 @@ export const age = z
 
 export const university = z
   .string()
-  .min(2, "Повідмолення повинно містити мінімум 2 букви");
+  .min(2, "Повідмолення повинно містити мінімум 2 букви").max(MAX_STRING_LENGTH, {message: "Використовуйте менше 50-ти символів"});;
 
 export const group = z
-  .string();
+  .string().max(MAX_STRING_LENGTH, {message: "Використовуйте менше 50-ти символів"});;
 
 export const course = z
   .number({message: "Курс повинен бути числом"})
@@ -28,5 +28,5 @@ export const course = z
 
 export const source = z
   .string()
-  .min(1, "Будь ласка, вкажіть як дізналися про проєкт");
+  .min(1, "Будь ласка, вкажіть як дізналися про проєкт").max(MAX_STRING_LENGTH, {message: "Використовуйте менше 50-ти символів"});;
 export const contact = z.string();
