@@ -35,16 +35,18 @@ export class UserDb {
         userId: chatId,
       },
     });
-    await prisma.teamMember.create({
-      data: {
-        userData: data,
-        user: {
-          connect: {
-            id: user?.id,
+    if (user !== null)
+      await prisma.teamMember.create({
+        data: {
+          chatId: user.userId,
+          userData: data,
+          user: {
+            connect: {
+              id: user?.id,
+            },
           },
         },
-      },
-    });
+      });
   }
 
   async getTeamMember(userId: number) {
@@ -65,7 +67,7 @@ export class UserDb {
     }
   }
 
-  async getTeamFromDb(chatId: number) {
+  async getMyTeamFromDb(chatId: number) {
     const teamMember = await this.getTeamMember(chatId);
     if (teamMember === null) {
       return null;
@@ -82,8 +84,8 @@ export class UserDb {
     }
   }
 
-  async getTeamMembers(chatId: number) {
-    const team = await this.getTeamFromDb(chatId);
+  async getMembersOfMyTeam(chatId: number) {
+    const team = await this.getMyTeamFromDb(chatId);
     const teamID = team?.id;
 
     const members = await prisma.teamMember.findMany({
@@ -93,5 +95,13 @@ export class UserDb {
     });
 
     return members;
+  }
+  async getTeamById(teamId: string){
+    const team = await prisma.team.findUnique({
+      where: {
+        id: teamId
+      }
+    })
+    return team;
   }
 }
