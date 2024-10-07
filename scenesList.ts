@@ -1,3 +1,6 @@
+import { AdminScene } from "./src/modules/adminModules/admin.module/admin.scene";
+import { HandleTeamAdminScene } from "./src/modules/adminModules/handleTeamAdmin.module/handleTeamAdmin.scene";
+import { SendMessageScene } from "./src/modules/adminModules/sendMessage.module/sendMessage.scene";
 import { HomeScene } from "./src/modules/hello.module/home.scene";
 import { RegistrationScene } from "./src/modules/registration.module/registration.scene";
 import { TeamCreateScene } from "./src/modules/teamCreate.module/teamCreate.scene";
@@ -19,6 +22,9 @@ export enum SceneEnum {
   TeamCreate = "Створити команду",
   TeamJoin = "Приєднатися до команди",
   TeamExit = "Вийти з команди",
+  Admin = "ParadaParadnaNaParadniyParadiCherezParaduParadnuPoParandiiiiPardniyParadi",
+  SendMessage = "Надіслати повідомлення",
+  HandleTeamAdmin = "Керувати командою"
 }
 
 export interface iScene {
@@ -34,6 +40,10 @@ export class AllScenes {
   public readonly TeamCreateScene = TeamCreateScene;
   public readonly TeamInfoScene = TeamInfoScene;
   public readonly TeamJoinScene = TeamJoinScene;
+  public readonly AdminScene = AdminScene;
+  public readonly SendMessageScene = SendMessageScene;
+  public readonly HandleTeamAdmin = HandleTeamAdminScene;
+
   public allScenes: iScene[] = [
     {
       name: SceneEnum.Home,
@@ -75,5 +85,23 @@ export class AllScenes {
       prevScene: SceneEnum.Home,
       enter: this.TeamInfoScene.enter,
     },
+    {
+      name: SceneEnum.Admin,
+      nextScenes: [SceneEnum.SendMessage, SceneEnum.HandleTeamAdmin],
+      prevScene: null,
+      enter: this.AdminScene.enter,
+    },
+    {
+      name: SceneEnum.SendMessage,
+      nextScenes: null,
+      prevScene: SceneEnum.Admin,
+      enter: this.SendMessageScene.enter,
+    },
+    {
+      name: SceneEnum.HandleTeamAdmin,
+      nextScenes: null,
+      prevScene: SceneEnum.Admin,
+      enter: this.HandleTeamAdmin.enter,
+    }
   ];
 }
