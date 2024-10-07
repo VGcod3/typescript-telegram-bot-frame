@@ -31,7 +31,7 @@ model TeamMember {
 
   user   User   @relation(fields: [userId], references: [id])
   userId String @unique @db.ObjectId
-
+  chatId Int @unique
   team   Team?   @relation(fields: [teamId], references: [id])
   teamId String? @unique @db.ObjectId
 
