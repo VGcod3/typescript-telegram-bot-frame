@@ -121,8 +121,73 @@ export class Sender {
       reply_markup: {
         keyboard: KeyboardButtons,
         resize_keyboard: true,
-        one_time_keyboard: false
+        one_time_keyboard: false,
       },
     });
+  }
+
+  async sendPhotoHTML(
+    chatId: number,
+    caption: string,
+    filePath?: string,
+    photoId?: string,
+  ) {
+    if (filePath !== undefined) {
+      const relativeFilePath = path.join(__dirname, filePath); // Ensure you're working within the project folder
+
+      // Check if the file exists before proceeding
+      if (!fs.existsSync(relativeFilePath)) {
+        throw new Error(`File not found: ${relativeFilePath}`);
+      }
+
+      // Create a stream for the file and send it via the bot
+      const photoStream = fs.createReadStream(relativeFilePath);
+
+      await this.bot.sendPhoto({
+        chat_id: chatId,
+        photo: photoStream, // Pass the file stream
+        caption: caption,
+        parse_mode: "HTML", // Use HTML for formatting
+      });
+    } else if (photoId !== undefined) {
+      await this.bot.sendPhoto({
+        chat_id: chatId,
+        photo: photoId, // Pass the file stream
+        caption: caption,
+        parse_mode: "HTML", // Use HTML for formatting
+      });
+    }
+  }
+  async sendPhotoMarkdown(
+    chatId: number,
+    caption: string,
+    filePath: string,
+    photoId?: string,
+  ) {
+    if (filePath !== undefined) {
+      const relativeFilePath = path.join(__dirname, filePath); // Ensure you're working within the project folder
+
+      // Check if the file exists before proceeding
+      if (!fs.existsSync(relativeFilePath)) {
+        throw new Error(`File not found: ${relativeFilePath}`);
+      }
+
+      // Create a stream for the file and send it via the bot
+      const photoStream = fs.createReadStream(relativeFilePath);
+
+      await this.bot.sendPhoto({
+        chat_id: chatId,
+        photo: photoStream, // Pass the file stream
+        caption: caption,
+        parse_mode: "MarkdownV2", // Use HTML for formatting
+      });
+    } else if (photoId !== undefined) {
+      await this.bot.sendPhoto({
+        chat_id: chatId,
+        photo: photoId, // Pass the file stream
+        caption: caption,
+        parse_mode: "MarkdownV2", // Use HTML for formatting
+      });
+    }
   }
 }
