@@ -5,6 +5,7 @@ import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
 import { prisma } from "../../db.utils/prisma.client";
 import { BACK, startMessage } from "../../sharedText";
+import { MAX_STRING_LENGTH } from "../../z.schemas/schema.TeamMember";
 
 export class TeamCreateService {
   private readonly UserDb: UserDb;
@@ -41,33 +42,40 @@ export class TeamCreateService {
       );
       return;
     } else {
-      const newTeam = await prisma.team.create({
-        data: {
-          name: teamName,
-        },
-      });
-      const user = await prisma.user.findUnique({
-        where: {
-          userId: chatId,
-        },
-      });
-      await prisma.teamMember.update({
-        where: {
-          userId: user?.id,
-        },
-        data: {
-          teamId: newTeam.id,
-        },
-      });
+      if (teamName.length < MAX_STRING_LENGTH) {
+        const newTeam = await prisma.team.create({
+          data: {
+            name: teamName,
+          },
+        });
+        const user = await prisma.user.findUnique({
+          where: {
+            userId: chatId,
+          },
+        });
+        await prisma.teamMember.update({
+          where: {
+            userId: user?.id,
+          },
+          data: {
+            teamId: newTeam.id,
+          },
+        });
 
-      await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
-      await this.sendLocalStageKeyboard(
-        chatId,
-        `Команда створена\\! Щоб до неї приєдналися інші учасники, поділіться ID вашої команди: \`${this.escapeMarkdown(
-          newTeam!.id.toString(),
-        )}\``,
-        true,
-      );
+        await this.sceneNavigator.setScene(chatId, SceneEnum.Home);
+        await this.sendLocalStageKeyboard(
+          chatId,
+          `Команда створена\\! Щоб до неї приєдналися інші учасники, поділіться ID вашої команди: \`${this.escapeMarkdown(
+            newTeam!.id.toString(),
+          )}\``,
+          true,
+        );
+      } else {
+        await this.sendLocalStageKeyboard(
+          chatId,
+          "Використовуйте менше 50-ти символів",
+        );
+      }
     }
   }
   private escapeMarkdown(text: string | undefined): string {
@@ -99,7 +107,7 @@ export class TeamCreateService {
   ) {
     const currentScene = await this.sceneNavigator.getCurrentScene(chatId);
     const teamMember = await this.UserDb.getTeamMember(chatId);
-    const isAprooved = (await this.UserDb.getTeamFromDb(chatId))?.isAprooved;
+    const isAprooved = (await this.UserDb.getMyTeamFromDb(chatId))?.isAprooved;
     const availableScenesNames =
       await this.sceneNavigator.getAvailableNextScenes(
         chatId,
