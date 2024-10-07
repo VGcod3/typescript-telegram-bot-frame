@@ -45,7 +45,8 @@ export class HomeService {
   async handleKeyboard(message: MessageType) {
     const chatId = message.chat.id;
     const teamMember = await this.UserDb.getTeamMember(chatId);
-    const teamAprooved = (await this.UserDb.getTeamFromDb(chatId))?.isAprooved;
+    const teamAprooved = (await this.UserDb.getMyTeamFromDb(chatId))
+      ?.isAprooved;
     const availableScenes = await this.sceneNavigator.getAvailableNextScenes(
       chatId,
       teamMember,
@@ -133,8 +134,8 @@ export class HomeService {
       case "Інформація про команду":
         this.handleTeam(message);
         break;
-      case "Тестове завдання":
-        this.handleTestTask(chatId);
+      case "Про івент":
+        this.handleAboutCTF(chatId);
       default:
         break;
     }
@@ -177,10 +178,11 @@ export class HomeService {
     chatId: number,
     text: string,
     url: string = "",
+    parseMode: boolean = false,
   ) {
     const currentScene = await this.sceneNavigator.getCurrentScene(chatId);
     const teamMember = await this.UserDb.getTeamMember(chatId);
-    const isAprooved = (await this.UserDb.getTeamFromDb(chatId))?.isAprooved;
+    const isAprooved = (await this.UserDb.getMyTeamFromDb(chatId))?.isAprooved;
     const availableScenesNames =
       await this.sceneNavigator.getAvailableNextScenes(
         chatId,
@@ -198,9 +200,13 @@ export class HomeService {
       : scenesButtons;
 
     const keyboardButtons = this.chunkArray(allButtons, 2);
-    if (url === "")
-      await this.sender.sendKeyboardHTML(chatId, text, keyboardButtons);
-    else {
+    if (url === "") {
+      if (!parseMode)
+        await this.sender.sendKeyboardHTML(chatId, text, keyboardButtons);
+      else {
+        await this.sender.sendKeyboardMARKDOWN(chatId, text, keyboardButtons);
+      }
+    } else {
       await this.sender.sendPhotoWithKeyBoard(
         chatId,
         url,
@@ -217,25 +223,25 @@ export class HomeService {
     this.sender.sendPhoto(chatId, "/public/aboutCTF.png", aboutEventText);
   }
   private handleLocation(chatId: number) {
-    this.sender.sendText(chatId, locationText);
+    this.sender.sendPhoto(chatId, "/public/location.png", locationText);
   }
   private handleParticipantsChat(chatId: number) {
-    this.sender.sendText(chatId, "посилання");
+    this.sender.sendPhoto(chatId, "/public/participantsChat.png", "посилання");
   }
   private handleTestTask(chatId: number) {
     this.sender.sendPhoto(chatId, "/public/test.png", testTaskText);
   }
   private handleFindTeamChat(chatId: number) {
-    this.sender.sendText(chatId, aboutChatText);
+    this.sender.sendPhoto(chatId, "/public/findTeam.png", aboutChatText);
   }
   private handleRules(chatId: number) {
-    this.sender.sendText(chatId, rulesText);
+    this.sender.sendPhoto(chatId, "/public/rules.png", rulesText);
   }
 
   async getTeamInfo(chatId: number) {
-    const team = await this.UserDb.getTeamFromDb(chatId);
+    const team = await this.UserDb.getMyTeamFromDb(chatId);
     const teamName = team?.name;
-    const teamMembers = await this.UserDb.getTeamMembers(chatId);
+    const teamMembers = await this.UserDb.getMembersOfMyTeam(chatId);
 
     const teamInfo = teamMembers
       .map((member) => {
@@ -253,19 +259,16 @@ export class HomeService {
       })
       .join("\n");
 
-    const sendTeamInfo = async () => {
-      await this.sender.sendTextMARKDOWN(
-        chatId,
-        `Id команди: \`${this.escapeMarkdown(
-          team!.id.toString(),
-        )}\`\n*Ім'я команди:* ${this.escapeMarkdown(
-          teamName,
-        )}\n*Члени команди:*\n${teamInfo}\n`,
-        true,
-      );
-    };
-
-    await sendTeamInfo();
+    await this.sendLocalStageKeyboard(
+      chatId,
+      `Id команди: \`${this.escapeMarkdown(
+        team!.id.toString(),
+      )}\`\n*Ім'я команди:* ${this.escapeMarkdown(
+        teamName,
+      )}\n*Члени команди:*\n${teamInfo}\n`,
+      "",
+      true,
+    );
   }
 
   private escapeMarkdown(text: string | undefined): string {

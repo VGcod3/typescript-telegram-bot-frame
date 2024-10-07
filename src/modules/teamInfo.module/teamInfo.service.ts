@@ -77,7 +77,8 @@ export class TeamInfoService {
   private async sendLocalStageKeyboard(chatId: number, text: string) {
     const currentScene = await this.sceneNavigator.getCurrentScene(chatId);
     const teamMember = await this.UserDb.getTeamMember(chatId);
-    const teamAprooved = (await this.UserDb.getTeamFromDb(chatId))?.isAprooved;
+    const teamAprooved = (await this.UserDb.getMyTeamFromDb(chatId))
+      ?.isAprooved;
     const availableScenesNames =
       await this.sceneNavigator.getAvailableNextScenes(
         chatId,
