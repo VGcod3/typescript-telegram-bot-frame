@@ -1,5 +1,5 @@
 import { SessionManager, UserSession } from "./SessionManager";
-import { UserDb } from "./src/db.utils/user.utils";
+import { UserDb } from "../db/user.utils";
 
 export type SessionStorageType = Map<number, UserSession>;
 

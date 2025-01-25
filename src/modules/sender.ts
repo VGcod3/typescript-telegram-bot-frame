@@ -1,5 +1,5 @@
 import { TelegramBot } from "typescript-telegram-bot-api";
-import { BotInstance } from "../../BotInstance";
+import { BotInstance } from "./BotInstance";
 import {
   KeyboardButton,
   Message,
@@ -33,7 +33,7 @@ export class Sender {
   async sendKeyboard(
     chatId: number,
     text: string,
-    keyboard: KeyboardButton[][]
+    keyboard: KeyboardButton[][],
   ) {
     await this.bot.sendMessage({
       chat_id: chatId,

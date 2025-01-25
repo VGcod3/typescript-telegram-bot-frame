@@ -1,7 +1,9 @@
 import "dotenv/config";
-import { envInit, getEnv } from "./env.setup";
-import { BotInstance } from "./BotInstance";
-import { HomeScene } from "./src/modules/hello.module/home.scene";
+import { BotInstance } from "./src/modules/BotInstance";
+import { getEnv, envInit } from "./env.setup";
+import { SettingScene } from "./src/scenes/setting-scene/setting.module";
+import { SceneFactory } from "./src/modules/SceneFactory";
+import { SceneEnum } from "./src/enums/SceneEnum";
 
 envInit();
 global.ENV = getEnv();
@@ -10,9 +12,11 @@ const botInit = () => {
   const bot = BotInstance.getInstance();
   bot.startPolling();
 
-  // bot.getMe().then(console.log).catch(console.error);
+  SceneFactory.buildScene(SceneEnum.Home).enter();
 
-  HomeScene.enter();
+  // const homeScene = new SettingScene();
+
+  // homeScene.enter();
 };
 
 botInit();

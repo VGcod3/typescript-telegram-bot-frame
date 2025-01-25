@@ -1,6 +1,6 @@
-import { SceneEnum } from "./scenesList";
+import { SceneEnum } from "../enums/SceneEnum";
 import { SessionStorageType, UserSessionStorage } from "./SessionsStorage";
-import { UserDb } from "./src/db.utils/user.utils";
+import { UserDb } from "../db/user.utils";
 
 export interface UserSession {
   currentScene: SceneEnum;
@@ -36,7 +36,7 @@ export class SessionManager {
     });
   }
 
-  public async initSession(chatId: number) {
+  public initSession(chatId: number) {
     const sessionData = {
       currentScene: SceneEnum.Home,
       data: {},
@@ -44,6 +44,6 @@ export class SessionManager {
 
     this.sessions.set(chatId, sessionData);
 
-    await this.pushSessionData(chatId, sessionData);
+    return sessionData;
   }
 }

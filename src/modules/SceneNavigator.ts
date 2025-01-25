@@ -1,30 +1,36 @@
-import { BotInstance } from "./BotInstance";
-import { AllScenes, iScene, SceneEnum } from "./scenesList";
-import { SessionManager, UserSession } from "./SessionManager";
-import { Sender } from "./src/modules/sender";
+import { SceneFactory } from "./SceneFactory";
+
+import { SceneEnum } from "../enums/SceneEnum";
+import { Sender } from "./Sender";
+import { UserSession, SessionManager } from "./SessionManager";
+import { SceneRoute, scenesMap } from "./SceneRouting";
 
 export class SceneNavigator {
-  private readonly scenes: Map<string, iScene>;
+  private readonly scenes: Map<SceneEnum, SceneRoute>;
   private readonly sessions: Map<number, UserSession>;
+  private readonly sceneFactory: typeof SceneFactory;
 
   constructor(private readonly sessionManager: SessionManager) {
-    const allScenes = new AllScenes().allScenes;
-
+    typeof SceneFactory;
     this.sessionManager = sessionManager;
     this.sessions = sessionManager.sessions;
 
-    this.scenes = new Map(allScenes.map((scene) => [scene.name, scene]));
+    this.sceneFactory = SceneFactory;
+
+    this.scenes = scenesMap;
   }
 
   public async setScene(chatId: number, sceneName: SceneEnum): Promise<void> {
     const session = this.sessions.get(chatId);
 
     if (!session) {
-      await this.sessionManager.initSession(chatId);
+      this.sessionManager.initSession(chatId);
 
       this.setScene(chatId, sceneName);
       return;
     }
+
+    this.sceneFactory.buildScene(sceneName).enter();
 
     const sessionData = {
       ...session,
@@ -32,7 +38,6 @@ export class SceneNavigator {
     };
 
     this.sessions.set(chatId, sessionData);
-    this.enterModuleScene(chatId);
     this.sessionManager.pushSessionData(chatId, sessionData);
   }
 
@@ -40,7 +45,7 @@ export class SceneNavigator {
     const session = this.sessions.get(chatId);
 
     if (!session) {
-      await this.sessionManager.initSession(chatId);
+      this.sessionManager.initSession(chatId);
 
       this.goBack(chatId);
       return;
@@ -74,31 +79,21 @@ export class SceneNavigator {
     return nextScenes;
   }
 
-  private getScene(sceneName: string): iScene {
+  private getScene(sceneName: SceneEnum): SceneRoute {
     const scene = this.scenes.get(sceneName);
 
     return scene ? scene : this.scenes.get(SceneEnum.Home)!;
   }
 
-  public async getCurrentScene(chatId: number): Promise<iScene> {
+  public async getCurrentScene(chatId: number): Promise<SceneRoute> {
     const session = this.sessions.get(chatId);
 
     if (!session) {
-      await this.sessionManager.initSession(chatId);
+      this.sessionManager.initSession(chatId);
       return this.getCurrentScene(chatId);
     }
 
     return this.getScene(session.currentScene);
-  }
-
-  private async enterModuleScene(chatId: number) {
-    const currentScene = await this.getCurrentScene(chatId);
-
-    const bot = BotInstance.getInstance();
-
-    bot.removeAllListeners();
-
-    currentScene.enter();
   }
 
   public async sendStagenavigationKeyboard(
