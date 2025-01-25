@@ -25,13 +25,7 @@ export abstract class BaseService {
   }
 
   async handleKeyboard(message: MessageType): Promise<void> {
-    const enteredText = message.text;
-
     const chatId = message.chat.id;
-
-    // console.log(message.from?.id);
-
-    this.sender.sendText(chatId, enteredText);
 
     const availableSceneNames =
       await this.sceneNavigator.getAvailableNextScenes(chatId);
