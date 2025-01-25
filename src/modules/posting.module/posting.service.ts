@@ -25,8 +25,6 @@ export class PostingService {
 
     const users = await this.UserDb.getAllUsers();
 
-    console.log(users);
-
     this.sender.sendText(chatId, users.map((user) => user.userId).join("\n"));
   }
 

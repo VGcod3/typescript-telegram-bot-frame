@@ -5,17 +5,16 @@ import { SessionManager } from "../../../SessionManager";
 import { SceneEnum } from "../../../scenesList";
 
 export class HomeService {
-  private readonly UserDb: UserDb;
-  private readonly sender: Sender;
-  private readonly sceneNavigator: SceneNavigator;
-  private readonly sessionManager: SessionManager;
-
-  constructor() {
-    this.UserDb = new UserDb();
-    this.sender = new Sender();
-
-    this.sessionManager = new SessionManager(this.UserDb);
-    this.sceneNavigator = new SceneNavigator(this.sessionManager);
+  constructor(
+    private readonly userDb: UserDb,
+    private readonly sender: Sender,
+    private readonly sceneNavigator: SceneNavigator,
+    private readonly sessionManager: SessionManager,
+  ) {
+    this.userDb = userDb;
+    this.sender = sender;
+    this.sessionManager = sessionManager;
+    this.sceneNavigator = sceneNavigator;
   }
 
   async handleStart(message: MessageType) {
@@ -23,12 +22,12 @@ export class HomeService {
 
     await this.sessionManager.initSession(chatId);
 
-    const user = await this.UserDb.getUser(chatId);
+    const user = await this.userDb.getUser(chatId);
 
     if (user) {
       await this.sender.sendText(chatId, "Welcome back!");
     } else {
-      await this.UserDb.createUser(chatId);
+      await this.userDb.createUser(chatId);
       await this.sender.sendText(chatId, "Welcome, nice to see you!");
     }
 
@@ -56,7 +55,7 @@ export class HomeService {
     const chatId = message.chat.id;
 
     try {
-      const users = await this.UserDb.getAllUsers();
+      const users = await this.userDb.getAllUsers();
 
       await this.sender.sendText(chatId, `Users: ${users.length}`);
     } catch (error) {

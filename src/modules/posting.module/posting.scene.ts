@@ -1,25 +1,19 @@
-import { SceneNavigator } from "../../../SceneNavigator";
-import { SessionManager } from "../../../SessionManager";
-import { UserDb } from "../../db.utils/user.utils";
-import { Sender } from "../sender";
+import { BaseModuleScene } from "../BaseModuleScene";
 import { PostingController } from "./posting.controller";
 import { PostingService } from "./posting.service";
 
-export class PostingScene {
+export class PostingScene implements BaseModuleScene {
   public static enter() {
     console.log("Posting scene entered");
 
-    const userDb = new UserDb();
-    const sender = new Sender();
-
-    const sessionManager = new SessionManager(userDb);
-    const sceneNavigator = new SceneNavigator(sessionManager);
+    const { userDb, sender, sessionManager, sceneNavigator } =
+      BaseModuleScene.initBaseModules();
 
     const postingService = new PostingService(
       userDb,
       sender,
       sceneNavigator,
-      sessionManager
+      sessionManager,
     );
 
     new PostingController(postingService);

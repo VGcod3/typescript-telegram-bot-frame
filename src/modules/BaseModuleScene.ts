@@ -4,17 +4,18 @@ import { UserDb } from "../db.utils/user.utils";
 import { Sender } from "./sender";
 
 export class BaseModuleScene {
-  public readonly sender: Sender;
-  public readonly userDb: UserDb;
-  public readonly sessionManager: SessionManager;
-  public readonly sceneManager: SceneNavigator;
+  public static initBaseModules() {
+    const userDb = new UserDb();
+    const sender = new Sender();
 
-  constructor() {
-    this.sender = new Sender();
-    this.userDb = new UserDb();
+    const sessionManager = new SessionManager(userDb);
+    const sceneNavigator = new SceneNavigator(sessionManager);
 
-    this.sessionManager = new SessionManager(this.userDb);
-
-    this.sceneManager = new SceneNavigator(this.sessionManager);
+    return {
+      userDb,
+      sender,
+      sessionManager,
+      sceneNavigator,
+    };
   }
 }

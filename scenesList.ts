@@ -8,7 +8,6 @@ export enum SceneEnum {
   Notifications = "notifications",
   Language = "language",
   Theme = "theme",
-  Posting = "posting",
 }
 
 export interface iScene {
@@ -25,44 +24,35 @@ export class AllScenes {
   public allScenes: iScene[] = [
     {
       name: SceneEnum.Home,
-      nextScenes: [SceneEnum.Users, SceneEnum.Settings, SceneEnum.Posting],
+      nextScenes: [SceneEnum.Users, SceneEnum.Settings],
       prevScene: null,
-      // module: HomeScene,
+
       enter: this.HomeScene.enter,
     },
-    {
-      name: SceneEnum.Posting,
-      nextScenes: null,
-      prevScene: SceneEnum.Home,
-      // module: PostingScene,
-      enter: this.PostingScene.enter,
-    },
+
     {
       name: SceneEnum.Users,
       nextScenes: null,
       prevScene: SceneEnum.Home,
-      // module: HomeScene,
+
       enter: this.HomeScene.enter,
     },
     {
       name: SceneEnum.Notifications,
       nextScenes: null,
       prevScene: SceneEnum.Settings,
-      // module: HomeScene,
       enter: this.HomeScene.enter,
     },
     {
       name: SceneEnum.Language,
       nextScenes: null,
       prevScene: SceneEnum.Settings,
-      // module: HomeScene,
       enter: this.HomeScene.enter,
     },
     {
       name: SceneEnum.Theme,
       nextScenes: null,
       prevScene: SceneEnum.Settings,
-      // module: HomeScene,
       enter: this.HomeScene.enter,
     },
     {
@@ -73,7 +63,6 @@ export class AllScenes {
         SceneEnum.Theme,
       ],
       prevScene: SceneEnum.Home,
-      // module: HomeScene,
       enter: this.HomeScene.enter,
     },
   ];
