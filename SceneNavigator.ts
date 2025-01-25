@@ -1,6 +1,7 @@
 import { BotInstance } from "./BotInstance";
 import { AllScenes, iScene, SceneEnum } from "./scenesList";
 import { SessionManager, UserSession } from "./SessionManager";
+import { Sender } from "./src/modules/sender";
 
 export class SceneNavigator {
   private readonly scenes: Map<string, iScene>;
@@ -98,9 +99,23 @@ export class SceneNavigator {
     bot.removeAllListeners();
 
     currentScene.enter();
+  }
 
-    // new sceneModule(this.sessions);
+  public async sendStagenavigationKeyboard(
+    chatId: number,
+    sender: Sender,
+    textMessage: string = "Choose an option",
+  ) {
+    const currentScene = await this.getCurrentScene(chatId);
 
-    // console.log(sceneModule);
+    const availableScenesNames = await this.getAvailableNextScenes(chatId);
+
+    const canGoBack = !!currentScene.prevScene;
+
+    await sender.sendKeyboard(chatId, textMessage, [
+      availableScenesNames.map((scene) => ({ text: scene })),
+
+      canGoBack ? [{ text: "Back" }] : [],
+    ]);
   }
 }

@@ -1,5 +1,4 @@
 import { HomeScene } from "./src/modules/hello.module/home.scene";
-import { PostingScene } from "./src/modules/posting.module/posting.scene";
 
 export enum SceneEnum {
   Home = "home",
@@ -19,7 +18,6 @@ export interface iScene {
 
 export class AllScenes {
   public readonly HomeScene = HomeScene;
-  public readonly PostingScene = PostingScene;
 
   public allScenes: iScene[] = [
     {

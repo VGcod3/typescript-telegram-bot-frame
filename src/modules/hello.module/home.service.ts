@@ -64,17 +64,10 @@ export class HomeService {
   }
 
   private async sendLocalStageKeyboard(chatId: number) {
-    const currentScene = await this.sceneNavigator.getCurrentScene(chatId);
-
-    const availableScenesNames =
-      await this.sceneNavigator.getAvailableNextScenes(chatId);
-
-    const canGoBack = !!currentScene.prevScene;
-
-    await this.sender.sendKeyboard(chatId, "Choose an option", [
-      availableScenesNames.map((scene) => ({ text: scene })),
-
-      canGoBack ? [{ text: "Back" }] : [],
-    ]);
+    await this.sceneNavigator.sendStagenavigationKeyboard(
+      chatId,
+      this.sender,
+      "Choose a scene",
+    );
   }
 }
