@@ -9,7 +9,7 @@ export type SceneRoutingScheme = Record<SceneEnum, SceneRoute>;
 
 export const sceneRoutingScheme: SceneRoutingScheme = {
   [SceneEnum.Home]: {
-    nextScenes: [SceneEnum.Users, SceneEnum.Settings],
+    nextScenes: [SceneEnum.Users, SceneEnum.Pokemon, SceneEnum.Settings],
     prevScene: null,
   },
   [SceneEnum.Users]: {
@@ -31,6 +31,18 @@ export const sceneRoutingScheme: SceneRoutingScheme = {
   [SceneEnum.Settings]: {
     nextScenes: [SceneEnum.Notifications, SceneEnum.Language, SceneEnum.Theme],
     prevScene: SceneEnum.Home,
+  },
+  [SceneEnum.Pokemon]: {
+    nextScenes: [SceneEnum.GeneratePokemon, SceneEnum.GetAllPokemons],
+    prevScene: SceneEnum.Home,
+  },
+  [SceneEnum.GeneratePokemon]: {
+    nextScenes: null,
+    prevScene: SceneEnum.Pokemon,
+  },
+  [SceneEnum.GetAllPokemons]: {
+    nextScenes: null,
+    prevScene: SceneEnum.Pokemon,
   },
 } as const;
 

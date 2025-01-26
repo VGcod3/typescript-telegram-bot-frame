@@ -4,7 +4,7 @@ import { BotInstance } from "../../modules/BotInstance";
 import { BaseService } from "./base.service";
 
 export abstract class BaseController<T extends BaseService> {
-  private readonly bot: TelegramBot;
+  protected readonly bot: TelegramBot;
 
   constructor(protected readonly sceneService: T) {
     this.bot = BotInstance.getInstance();
@@ -21,5 +21,5 @@ export abstract class BaseController<T extends BaseService> {
     });
   }
 
-  public abstract handleTextMessage(message: MessageType): void;
+  protected abstract handleTextMessage(message: MessageType): void;
 }
