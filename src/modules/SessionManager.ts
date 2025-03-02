@@ -46,45 +46,4 @@ export class SessionManager {
 
     return sessionData;
   }
-
-  public getSession(chatId: number) {
-    return this.sessions.get(chatId);
-  }
-
-  public updateSession(chatId: number, data: any) {
-    const session = this.sessions.get(chatId);
-
-    if (!session) {
-      return;
-    }
-
-    const updatedSession = {
-      ...session,
-      data,
-    };
-
-    this.sessions.set(chatId, updatedSession);
-
-    return updatedSession;
-  }
-
-  public updateSessionData(chatId: number, data: any) {
-    const session = this.sessions.get(chatId);
-
-    if (!session) {
-      return;
-    }
-
-    const updatedData = {
-      ...session.data,
-      ...data,
-    };
-
-    this.sessions.set(chatId, {
-      ...session,
-      data: updatedData,
-    });
-
-    return updatedData;
-  }
 }

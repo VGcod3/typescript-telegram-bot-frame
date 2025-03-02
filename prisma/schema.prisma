@@ -23,22 +23,29 @@ model User {
 
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @default(now()) @updatedAt
+  TeamMember TeamMember?
 }
 
-model Pokemon {
-  id         String @id @default(auto()) @map("_id") @db.ObjectId
-  pokemonId  Int    @unique @map("pokemonId")
-  name       String
+model TeamMember {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  type       String
-  image      String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique @db.ObjectId
 
-  level      Int    @default(1)
-  hp         Int    @default(100)
-  attack     Int    @default(50)
-  defense    Int    @default(50)
-  speed      Int    @default(50)
+  team   Team   @relation(fields: [teamId], references: [id])
+  teamId String @unique @db.ObjectId
 
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @default(now()) @updatedAt
+  role String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Team {
+  id      String       @id @default(auto()) @map("_id") @db.ObjectId
+  name    String
+  members TeamMember[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }

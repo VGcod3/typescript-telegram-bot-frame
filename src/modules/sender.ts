@@ -17,25 +17,17 @@ export class Sender {
   }
 
   async sendText(chatId: number, text: string) {
-    try {
-      await this.bot.sendMessage({
-        chat_id: chatId,
-        text,
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    await this.bot.sendMessage({
+      chat_id: chatId,
+      text,
+    });
   }
 
   async sendSticker(chatId: number, sticker: string) {
-    try {
-      await this.bot.sendSticker({
-        chat_id: chatId,
-        sticker,
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    await this.bot.sendSticker({
+      chat_id: chatId,
+      sticker,
+    });
   }
 
   async sendKeyboard(
@@ -43,18 +35,14 @@ export class Sender {
     text: string,
     keyboard: KeyboardButton[][],
   ) {
-    try {
-      await this.bot.sendMessage({
-        chat_id: chatId,
-        text,
-        reply_markup: {
-          keyboard,
-          one_time_keyboard: true,
-          resize_keyboard: true,
-        },
-      });
-    } catch (error) {
-      console.error(error);
-    }
+    await this.bot.sendMessage({
+      chat_id: chatId,
+      text,
+      reply_markup: {
+        keyboard,
+        one_time_keyboard: true,
+        resize_keyboard: true,
+      },
+    });
   }
 }

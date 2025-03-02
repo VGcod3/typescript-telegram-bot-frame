@@ -7,7 +7,7 @@ export class HomeController extends BaseController<HomeService> {
     super(sceneService);
   }
 
-  protected async handleTextMessage(message: MessageType) {
+  public async handleTextMessage(message: MessageType) {
     if (message.text === "/start") {
       this.sceneService.handleStart(message);
     } else {
