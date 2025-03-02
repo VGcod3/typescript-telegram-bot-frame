@@ -1,6 +1,6 @@
 import { UserDb } from "../../db/user.utils";
 import { SceneEnum } from "../../enums/SceneEnum";
-import { SceneNavigator } from "../../modules/SceneNavigator";
+import { BACK_BUTTON, SceneNavigator } from "../../modules/SceneNavigator";
 import { MessageType, Sender } from "../../modules/Sender";
 import { SessionManager } from "../../modules/SessionManager";
 
@@ -30,7 +30,7 @@ export abstract class BaseService {
     const availableSceneNames =
       await this.sceneNavigator.getAvailableNextScenes(chatId);
 
-    if (message.text === "Back") {
+    if (message.text === BACK_BUTTON) {
       this.sceneNavigator.goBack(chatId);
     } else if (availableSceneNames.includes(message.text as SceneEnum)) {
       this.sceneNavigator.setScene(chatId, message.text as SceneEnum);
@@ -42,10 +42,6 @@ export abstract class BaseService {
   }
 
   public async sendLocalStageKeyboard(chatId: number) {
-    await this.sceneNavigator.sendStagenavigationKeyboard(
-      chatId,
-      this.sender,
-      "Choose a scene",
-    );
+    await this.sceneNavigator.sendStagenavigationKeyboard(chatId, this.sender);
   }
 }

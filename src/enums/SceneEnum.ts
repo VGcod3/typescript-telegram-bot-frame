@@ -1,8 +1,11 @@
 export enum SceneEnum {
-  Home = "home",
-  Users = "/users",
-  Settings = "settings",
-  Notifications = "notifications",
-  Language = "language",
-  Theme = "theme",
+  Home = "🏠 Home",
+  Users = "👥 Users",
+  Settings = "⚙️ Settings",
+  Notifications = "🔔 Notifications",
+  Language = "🌐 Language",
+  Theme = "🎨 Theme",
+  Pokemon = "🍑 Pokemon",
+  GeneratePokemon = "✨ Generate pokemon",
+  GetAllPokemons = "📋 Get all pokemons",
 }

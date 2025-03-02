@@ -5,6 +5,8 @@ import { Sender } from "./Sender";
 import { UserSession, SessionManager } from "./SessionManager";
 import { SceneRoute, scenesMap } from "./SceneRouting";
 
+export const BACK_BUTTON = "⬅️  Back";
+
 export class SceneNavigator {
   private readonly scenes: Map<SceneEnum, SceneRoute>;
   private readonly sessions: Map<number, UserSession>;
@@ -99,7 +101,7 @@ export class SceneNavigator {
   public async sendStagenavigationKeyboard(
     chatId: number,
     sender: Sender,
-    textMessage: string = "Choose an option",
+    textMessage: string = "⌨️",
   ) {
     const currentScene = await this.getCurrentScene(chatId);
 
@@ -110,7 +112,7 @@ export class SceneNavigator {
     await sender.sendKeyboard(chatId, textMessage, [
       availableScenesNames.map((scene) => ({ text: scene })),
 
-      canGoBack ? [{ text: "Back" }] : [],
+      canGoBack ? [{ text: BACK_BUTTON }] : [],
     ]);
   }
 }
