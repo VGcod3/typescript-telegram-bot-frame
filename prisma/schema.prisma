@@ -20,6 +20,7 @@ model User {
 
   currentScene String @default("home")
 
+ favorites     Favorite[]
 
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @default(now()) @updatedAt
@@ -38,6 +39,19 @@ model Pokemon {
   attack     Int    @default(50)
   defense    Int    @default(50)
   speed      Int    @default(50)
+
+  favoritedBy Favorite[]
+
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @default(now()) @updatedAt
+}
+
+model Favorite {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  userId     Int
+  pokemonId  Int
+  user       User @relation(fields: [userId], references: [userId])
+  pokemon    Pokemon @relation(fields: [pokemonId], references: [pokemonId])
 
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @default(now()) @updatedAt

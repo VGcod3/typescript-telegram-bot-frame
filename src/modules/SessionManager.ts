@@ -1,10 +1,12 @@
 import { SceneEnum } from "../enums/SceneEnum";
 import { SessionStorageType, UserSessionStorage } from "./SessionsStorage";
-import { UserDb } from "../db/user.utils";
+import { UserDb } from "../db/user.db";
+import { Prisma } from "@prisma/client";
+import { JsonObject } from "@prisma/client/runtime/library";
 
 export interface UserSession {
   currentScene: SceneEnum;
-  data: any;
+  data: JsonObject;
 }
 
 export class SessionManager {
@@ -15,7 +17,7 @@ export class SessionManager {
     this.sessions = UserSessionStorage.getInstance(this.userDb);
   }
 
-  public async pushSessionData(chatId: number, data: any) {
+  public async pushSessionData(chatId: number, data: Prisma.UserUpdateInput) {
     const user = await this.userDb.getUser(chatId);
 
     if (!user) {
@@ -31,7 +33,7 @@ export class SessionManager {
     users.forEach((user) => {
       this.sessions.set(user.userId, {
         currentScene: user.currentScene as SceneEnum,
-        data: user.data,
+        data: (user.data as JsonObject) ?? {},
       });
     });
   }
@@ -51,7 +53,7 @@ export class SessionManager {
     return this.sessions.get(chatId);
   }
 
-  public updateSession(chatId: number, data: any) {
+  public updateSession(chatId: number, data: JsonObject) {
     const session = this.sessions.get(chatId);
 
     if (!session) {
@@ -68,7 +70,7 @@ export class SessionManager {
     return updatedSession;
   }
 
-  public updateSessionData(chatId: number, data: any) {
+  public updateSessionData(chatId: number, data: JsonObject) {
     const session = this.sessions.get(chatId);
 
     if (!session) {

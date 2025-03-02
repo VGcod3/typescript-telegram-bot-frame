@@ -1,4 +1,5 @@
-import { UserDb } from "../../db/user.utils";
+import { JsonObject } from "@prisma/client/runtime/library";
+import { UserDb } from "../../db/user.db";
 import { SceneEnum } from "../../enums/SceneEnum";
 import { BACK_BUTTON, SceneNavigator } from "../../modules/SceneNavigator";
 import { MessageType, Sender } from "../../modules/Sender";
@@ -18,7 +19,7 @@ export abstract class BaseService {
     this.sceneNavigator = new SceneNavigator(this.sessionManager);
   }
 
-  async initService(chatId: number, sessionData: any) {
+  async initService(chatId: number, sessionData: JsonObject) {
     await this.sendLocalStageKeyboard(chatId);
 
     await this.sessionManager.pushSessionData(chatId, sessionData);

@@ -1,7 +1,6 @@
 import "dotenv/config";
 import { BotInstance } from "./src/modules/BotInstance";
 import { getEnv, envInit } from "./env.setup";
-import { SettingScene } from "./src/scenes/setting-scene/setting.module";
 import { SceneFactory } from "./src/modules/SceneFactory";
 import { SceneEnum } from "./src/enums/SceneEnum";
 

@@ -35,7 +35,7 @@ export class SceneNavigator {
     this.sceneFactory.buildScene(sceneName).enter();
 
     const sessionData = {
-      ...session,
+      data: session.data || {},
       currentScene: sceneName,
     };
 
@@ -66,7 +66,7 @@ export class SceneNavigator {
     const session = this.sessions.get(chatId);
 
     if (!session) {
-      await this.sessionManager.initSession(chatId);
+      this.sessionManager.initSession(chatId);
       return this.getAvailableNextScenes(chatId);
     }
 
@@ -74,7 +74,7 @@ export class SceneNavigator {
 
     const nextScenes = currentScene.nextScenes;
 
-    if (nextScenes == null) {
+    if (nextScenes === null) {
       return [];
     }
 
