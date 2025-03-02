@@ -13,7 +13,6 @@ export class SceneNavigator {
   private readonly sceneFactory: typeof SceneFactory;
 
   constructor(private readonly sessionManager: SessionManager) {
-    typeof SceneFactory;
     this.sessionManager = sessionManager;
     this.sessions = sessionManager.sessions;
 
