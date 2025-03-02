@@ -2,7 +2,6 @@ import { PokemonService } from "./pokemon.service";
 import { MessageType } from "../../modules/Sender";
 import { BaseController } from "../base-scene/base.controller";
 import { SceneEnum } from "../../enums/SceneEnum";
-import { BotInstance } from "../../modules/BotInstance";
 import { CallbackQuery } from "typescript-telegram-bot-api/dist/types";
 
 export class PokemonController extends BaseController<PokemonService> {
@@ -18,7 +17,7 @@ export class PokemonController extends BaseController<PokemonService> {
     if (message.text === SceneEnum.GeneratePokemon) {
       await this.sceneService.createPokemon(message);
     } else if (message.text === SceneEnum.GetAllPokemons) {
-      await this.sceneService.getAllPokemons(message);
+      await this.sceneService.getPaginatedPokemons(message);
     }
     this.sceneService.handleKeyboard(message);
   }

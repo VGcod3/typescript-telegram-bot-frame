@@ -1,12 +1,17 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma.client";
 
 export class UserDb {
   async createUser(userId: number) {
-    return await prisma.user.create({
-      data: {
-        userId,
-      },
-    });
+    try {
+      return await prisma.user.create({
+        data: {
+          userId,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async getUser(userId: number) {
@@ -17,7 +22,7 @@ export class UserDb {
     });
   }
 
-  async updateUser(userId: number, data: any) {
+  async updateUser(userId: number, data: Prisma.UserUpdateInput) {
     return await prisma.user.update({
       where: {
         userId,

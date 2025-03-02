@@ -13,7 +13,7 @@ export class HomeController extends BaseController<HomeService> {
     } else {
       this.sceneService.handleKeyboard(message);
 
-      if (message.text === "/users") {
+      if (message.text === "👥 Users") {
         this.sceneService.handleUsers(message);
       }
     }
