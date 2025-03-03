@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma.client";
+import { Logger } from "../modules/Logger";
 
 export class UserDb {
   async createUser(userId: number) {
@@ -10,28 +11,44 @@ export class UserDb {
         },
       });
     } catch (error) {
-      console.log(error);
+      Logger.error(`Error creating user: ${error}`, "UserDb");
+      return null;
     }
   }
 
   async getUser(userId: number) {
-    return await prisma.user.findUnique({
-      where: {
-        userId,
-      },
-    });
+    try {
+      return await prisma.user.findUnique({
+        where: {
+          userId,
+        },
+      });
+    } catch (error) {
+      Logger.error(`Error getting user: ${error}`, "UserDb");
+      return null;
+    }
   }
 
   async updateUser(userId: number, data: Prisma.UserUpdateInput) {
-    return await prisma.user.update({
-      where: {
-        userId,
-      },
-      data,
-    });
+    try {
+      return await prisma.user.update({
+        where: {
+          userId,
+        },
+        data,
+      });
+    } catch (error) {
+      Logger.error(`Error updating user: ${error}`, "UserDb");
+      return null;
+    }
   }
 
   async getAllUsers() {
-    return await prisma.user.findMany();
+    try {
+      return await prisma.user.findMany();
+    } catch (error) {
+      Logger.error(`Error getting all users: ${error}`, "UserDb");
+      return [];
+    }
   }
 }

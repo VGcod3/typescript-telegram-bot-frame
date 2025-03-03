@@ -1,4 +1,5 @@
-import "dotenv/config";
+import dotenv from "dotenv-flow";
+dotenv.config();
 import { BotInstance } from "./src/modules/BotInstance";
 import { getEnv, envInit } from "./env.setup";
 import { SceneFactory } from "./src/modules/SceneFactory";
@@ -22,7 +23,7 @@ async function bootstrap() {
 
     Logger.info("Bot successfully started");
   } catch (error) {
-    Logger.error(`Failed to start bot: ${error}`);
+    Logger.error(`Failed to start bot: ${error}`, "Bootstrap");
     process.exit(1);
   }
 }

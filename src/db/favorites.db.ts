@@ -1,3 +1,4 @@
+import { Logger } from "../modules/Logger";
 import { Favorite } from "../interfaces/favorite";
 import { prisma } from "./prisma.client";
 
@@ -17,7 +18,7 @@ export class FavoritesDb {
         data: favorite,
       });
     } catch (error) {
-      console.log(error);
+      Logger.error(`Error creating favorite: ${error}`, "FavoritesDb");
       return null;
     }
   }
@@ -31,7 +32,7 @@ export class FavoritesDb {
         },
       });
     } catch (error) {
-      console.log(error);
+      Logger.error(`Error getting favorite by id: ${error}`, "FavoritesDb");
     }
   }
 
@@ -47,7 +48,10 @@ export class FavoritesDb {
         },
       });
     } catch (error) {
-      console.log(error);
+      Logger.error(
+        `Error getting favorite by user and pokemon id: ${error}`,
+        "FavoritesDb",
+      );
       return null;
     }
   }
@@ -60,7 +64,10 @@ export class FavoritesDb {
         },
       });
     } catch (error) {
-      console.log(error);
+      Logger.error(
+        `Error getting all favorites by user id: ${error}`,
+        "FavoritesDb",
+      );
       return null;
     }
   }
@@ -74,7 +81,10 @@ export class FavoritesDb {
         },
       });
     } catch (error) {
-      console.log(error);
+      Logger.error(
+        `Error deleting favorite by pokemon id: ${error}`,
+        "FavoritesDb",
+      );
       return null;
     }
   }

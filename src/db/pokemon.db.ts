@@ -1,4 +1,5 @@
 import { Pokemon } from "../interfaces/pokemon";
+import { Logger } from "../modules/Logger";
 import { prisma } from "./prisma.client";
 
 export class PokemonDb {
@@ -8,7 +9,7 @@ export class PokemonDb {
         data,
       });
     } catch (error) {
-      console.log(error);
+      Logger.error(`Error creating pokemon: ${error}`);
       return null;
     }
   }
@@ -21,7 +22,7 @@ export class PokemonDb {
         },
       });
     } catch (error) {
-      console.log(error);
+      Logger.error(`Error getting pokemon: ${error}`, "PokemonDb");
       return null;
     }
   }
@@ -38,7 +39,7 @@ export class PokemonDb {
         data,
       });
     } catch (error) {
-      console.log(error);
+      Logger.error(`Error updating pokemon: ${error}`, "PokemonDb");
       return null;
     }
   }
@@ -74,7 +75,7 @@ export class PokemonDb {
         isFavorited: !!pokemon.favoritedBy.length,
       }))[0];
     } catch (error) {
-      console.log(error);
+      Logger.error(`Error getting paginated pokemon: ${error}`, "PokemonDb");
       return null;
     }
   }
@@ -83,7 +84,7 @@ export class PokemonDb {
     try {
       return await prisma.pokemon.count();
     } catch (error) {
-      console.log(error);
+      Logger.error(`Error getting pokemon count: ${error}`, "PokemonDb");
       return 0;
     }
   }
@@ -96,7 +97,7 @@ export class PokemonDb {
         },
       });
     } catch (error) {
-      console.log(error);
+      Logger.error(`Error getting pokemon by id: ${error}`, "PokemonDb");
       return null;
     }
   }

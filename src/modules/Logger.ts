@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import winston from "winston";
 
 export class Logger {
   private static readonly COLORS = {
@@ -10,40 +11,90 @@ export class Logger {
     reset: "\x1b[0m", // Reset
   };
 
+  private static logger = winston.createLogger({
+    level: "info",
+    format: winston.format.combine(
+      winston.format.timestamp({
+        format: () => dayjs().format("YYYY-MM-DD HH:mm:ss"),
+      }),
+      winston.format.errors({ stack: true }),
+      winston.format.json(),
+    ),
+    defaultMeta: { service: "pokemon-bot" },
+    transports: [
+      // Write all logs with importance level of 'error' or less to 'error.log'
+      new winston.transports.File({
+        filename: "logs/error.log",
+        level: "error",
+        maxsize: 5242880, // 5MB
+        maxFiles: 5,
+      }),
+      // Write all logs with importance level of 'info' or less to 'combined.log'
+      new winston.transports.File({
+        filename: "logs/combined.log",
+        maxsize: 5242880, // 5MB
+        maxFiles: 5,
+      }),
+    ],
+  });
+
+  static {
+    // If we're not in production, log to console with colors
+    if (process.env.NODE_ENV !== "production") {
+      Logger.logger.add(
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.colorize(),
+            winston.format.simple(),
+            winston.format.printf(
+              ({ level, message, timestamp, context, stack }) => {
+                const baseMessage = `${timestamp} [${level}]${
+                  context ? ` [${context}]` : ""
+                }: ${message}`;
+                return stack ? `${baseMessage}\n${stack}` : baseMessage;
+              },
+            ),
+          ),
+        }),
+      );
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private static formatMessage(message: string, context?: string): any {
+    return {
+      message,
+      context,
+      timestamp: this.timestamp(),
+    };
+  }
+
   private static timestamp(): string {
     return dayjs().format("YYYY-MM-DD HH:mm:ss");
   }
 
-  private static format(
-    level: string,
-    message: string,
-    context?: string,
-  ): string {
-    return `${
-      this.COLORS[level as keyof typeof this.COLORS]
-    }[${level.toUpperCase()}] ${this.timestamp()}${
-      context ? ` [${context}]` : ""
-    } ${message}${this.COLORS.reset}`;
-  }
-
   static error(error: Error | string, context?: string) {
     const message = error instanceof Error ? error.message : error;
-    console.error(this.format("error", message, context));
+    const meta = this.formatMessage(message, context);
+    if (error instanceof Error) {
+      meta.stack = error.stack;
+    }
+    this.logger.error(meta);
   }
 
   static info(message: string, context?: string) {
-    console.info(this.format("info", message, context));
+    this.logger.info(this.formatMessage(message, context));
   }
 
   static warn(message: string, context?: string) {
-    console.warn(this.format("warn", message, context));
+    this.logger.warn(this.formatMessage(message, context));
   }
 
   static debug(message: string, context?: string) {
-    console.debug(this.format("debug", message, context));
+    this.logger.debug(this.formatMessage(message, context));
   }
 
   static log(message: string, context?: string) {
-    console.log(this.format("log", message, context));
+    this.logger.info(this.formatMessage(message, context));
   }
 }
