@@ -15,23 +15,6 @@ export abstract class BaseController<T extends BaseService> {
 
     this.sceneService = sceneService;
     this.setupMessageHandler();
-
-    this.bot.removeAllListeners();
-
-    this.bot.on("message:text", async (message: MessageType) => {
-      try {
-        // Handle commands first
-        if (message.text?.startsWith("/")) {
-          await BotInstance.commandHandler.handle(message);
-          return;
-        }
-
-        // Handle scene-specific messages
-        await this.handleTextMessage(message);
-      } catch (error) {
-        Logger.error(`Error handling message: ${error}`, "BaseController");
-      }
-    });
   }
 
   private setupMessageHandler(): void {
