@@ -3,19 +3,28 @@ import { BotInstance } from "./src/modules/BotInstance";
 import { getEnv, envInit } from "./env.setup";
 import { SceneFactory } from "./src/modules/SceneFactory";
 import { SceneEnum } from "./src/enums/SceneEnum";
+import { Logger } from "./src/modules/Logger";
 
-envInit();
-global.ENV = getEnv();
+async function bootstrap() {
+  try {
+    // Initialize environment
+    envInit();
+    global.ENV = getEnv();
 
-const botInit = () => {
-  const bot = BotInstance.getInstance();
-  bot.startPolling();
+    // Get bot instance
+    const bot = BotInstance.getInstance();
 
-  SceneFactory.buildScene(SceneEnum.Home).enter();
+    // Start bot
+    bot.startPolling();
 
-  // const homeScene = new SettingScene();
+    // Initialize first scene
+    SceneFactory.buildScene(SceneEnum.Home).enter();
 
-  // homeScene.enter();
-};
+    Logger.info("Bot successfully started");
+  } catch (error) {
+    Logger.error(`Failed to start bot: ${error}`);
+    process.exit(1);
+  }
+}
 
-botInit();
+bootstrap();
