@@ -8,14 +8,10 @@ export class HomeController extends BaseController<HomeService> {
   }
 
   protected async handleTextMessage(message: MessageType) {
-    if (message.text === "/start") {
-      this.sceneService.handleStart(message);
-    } else {
-      this.sceneService.handleKeyboard(message);
+    this.sceneService.handleKeyboard(message);
 
-      if (message.text === "👥 Users") {
-        this.sceneService.handleUsers(message);
-      }
+    if (message.text === "👥 Users") {
+      this.sceneService.handleUsers(message);
     }
   }
 }
