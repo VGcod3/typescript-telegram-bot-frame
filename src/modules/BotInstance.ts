@@ -1,9 +1,12 @@
 import { TelegramBot } from "typescript-telegram-bot-api";
 import { CommandHandler } from "../commands/CommandHandler";
 import { StartCommand } from "./StartCommand";
+import { MiddlewareManager } from "../middlewares/MiddlewareManager";
+import { rateLimitMiddleware } from "../middlewares/RateLimitter";
 
 export class BotInstance extends TelegramBot {
   private static instance: TelegramBot;
+  public static middlewareManager: MiddlewareManager;
   public static commandHandler: CommandHandler;
 
   public static getInstance(): TelegramBot {
@@ -14,6 +17,9 @@ export class BotInstance extends TelegramBot {
 
       this.commandHandler = new CommandHandler();
       this.registerCommands();
+
+      this.middlewareManager = new MiddlewareManager();
+      this.registerMiddleware();
     }
     return BotInstance.instance;
   }
@@ -25,7 +31,13 @@ export class BotInstance extends TelegramBot {
     ];
 
     commands.forEach((command) => {
-      BotInstance.commandHandler.register(command);
+      this.commandHandler.register(command);
     });
+  }
+
+  private static registerMiddleware(): void {
+    // this.middlewareManager.use(loggingMiddleware);
+    this.middlewareManager.use(rateLimitMiddleware);
+    // Add more middleware here
   }
 }

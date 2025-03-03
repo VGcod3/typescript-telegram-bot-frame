@@ -4,6 +4,7 @@ import {
   KeyboardButton,
   Message,
 } from "typescript-telegram-bot-api/dist/types";
+import { Logger } from "./Logger";
 
 export type MessageType = NonNullable<
   Message & Required<Pick<Message, "text">>
@@ -23,7 +24,7 @@ export class Sender {
         text,
       });
     } catch (error) {
-      console.error(error);
+      Logger.error(`Error sending text: ${error}`, "Sender");
     }
   }
 
@@ -34,7 +35,7 @@ export class Sender {
         sticker,
       });
     } catch (error) {
-      console.error(error);
+      Logger.error(`Error sending sticker: ${error}`, "Sender");
     }
   }
 
@@ -54,7 +55,7 @@ export class Sender {
         },
       });
     } catch (error) {
-      console.error(error);
+      Logger.error(`Error sending keyboard: ${error}`, "Sender");
     }
   }
 }

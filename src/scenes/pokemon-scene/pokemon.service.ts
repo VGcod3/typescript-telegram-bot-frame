@@ -7,6 +7,7 @@ import { BotInstance } from "../../modules/BotInstance";
 import { CallbackQuery } from "typescript-telegram-bot-api/dist/types";
 import { FavoritesDb } from "../../db/favorites.db";
 import { z } from "zod";
+import { Logger } from "../../modules/Logger";
 
 export class PokemonService extends BaseService {
   constructor(
@@ -35,8 +36,6 @@ export class PokemonService extends BaseService {
       skip: 0,
       take: 1,
     });
-
-    console.log(pokemon);
 
     if (!pokemon) {
       this.sender.sendText(chatId, "No pokemons found");
@@ -142,8 +141,6 @@ export class PokemonService extends BaseService {
       take: 1,
     });
 
-    console.log(nextPokemon);
-
     if (!nextPokemon) {
       this.sender.sendText(chatId, "No more items");
       return;
@@ -171,7 +168,7 @@ export class PokemonService extends BaseService {
         ),
       });
     } catch (error) {
-      console.warn("Error editing message", error);
+      Logger.error(`Error editing message: ${error}`, "PokemonService");
     }
   }
 
@@ -238,7 +235,7 @@ export class PokemonService extends BaseService {
         ),
       });
     } catch (error) {
-      console.warn("Error editing message", error);
+      Logger.error(`Error editing message: ${error}`, "PokemonService");
     }
   }
 
@@ -258,8 +255,6 @@ export class PokemonService extends BaseService {
     }
 
     this.sender.sendText(chatId, "Pokemon added to favorites");
-
-    console.log("Favorite created", JSON.stringify(favorite, null, 2));
   }
 
   private async handleRemoveFromFavorites(callbackQuery: CallbackQuery) {
@@ -270,8 +265,6 @@ export class PokemonService extends BaseService {
     await this.favoritesDb.deleteFavoriteByPokemonId(data.id, chatId);
 
     this.sender.sendText(chatId, "Pokemon removed from favorites");
-
-    console.log("Favorite removed", data.id);
   }
 
   private generateRandomPokemon(): Pokemon {

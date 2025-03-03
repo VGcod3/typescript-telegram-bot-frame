@@ -3,6 +3,7 @@ import { z } from "zod";
 const schema = z.object({
   TELEGRAM_BOT_TOKEN: z.string(),
   DATABASE_URL: z.string(),
+  NODE_ENV: z.string(),
 });
 
 declare global {
@@ -28,6 +29,7 @@ export function getEnv() {
   return {
     TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
     DATABASE_URL: process.env.DATABASE_URL,
+    NODE_ENV: process.env.NODE_ENV,
   };
 }
 

@@ -1,15 +1,17 @@
 {
   "scripts": {
+    "dev": "NODE_ENV=development nodemon index.ts",
     "start": "ts-node index.ts",
-    "dev": "nodemon index.ts",
-    "check": "tsc --noEmit && eslint ."
+    "check": "tsc --noEmit && eslint .",
+    "clean-logs": "rm -rf logs/*"
   },
   "dependencies": {
     "@faker-js/faker": "^9.4.0",
     "@prisma/client": "^5.9.1",
     "dayjs": "^1.11.13",
-    "dotenv": "^16.4.5",
+    "dotenv-flow": "^4.1.0",
     "typescript-telegram-bot-api": "^0.1.26",
+    "winston": "^3.17.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

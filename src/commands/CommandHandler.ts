@@ -25,7 +25,10 @@ export class CommandHandler {
     try {
       await command.execute(message);
     } catch (error) {
-      Logger.error(`Error executing command ${commandName}:`, error as string);
+      Logger.error(
+        `Error executing command ${commandName}: ${error}`,
+        "CommandHandler",
+      );
     }
   }
 

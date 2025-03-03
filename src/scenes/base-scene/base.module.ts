@@ -1,8 +1,9 @@
 import { SceneEnum } from "../../enums/SceneEnum";
+import { Logger } from "../../modules/Logger";
 
 export abstract class BaseScene {
   constructor(private readonly sceneName: SceneEnum) {
-    console.log(`${this.sceneName} scene entered`);
+    Logger.log(`${this.sceneName} scene created`);
   }
 
   abstract enter(): void;
