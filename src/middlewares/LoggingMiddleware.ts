@@ -2,8 +2,11 @@ import { Logger } from "../modules/Logger";
 import { MiddlewareFunction } from "./Middleware";
 
 export const loggingMiddleware: MiddlewareFunction = async (ctx, next) => {
+  const userId = ctx.message?.from?.id;
+
   const startTime = Date.now();
-  Logger.info(`Processing message from user ${ctx.message.from?.id}`);
+
+  Logger.info(`Processing message from user ${userId}`);
 
   await next();
 

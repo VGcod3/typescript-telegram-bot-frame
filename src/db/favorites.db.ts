@@ -4,16 +4,20 @@ import { prisma } from "./prisma.client";
 
 export class FavoritesDb {
   async createFavorite(favorite: Favorite): Promise<Favorite | null> {
-    const favoriteExists = await this.getFavoriteForUserByPokemonId(
-      favorite.userId,
-      favorite.pokemonId,
-    );
-
-    if (favoriteExists && favoriteExists.length > 0) {
-      return null;
-    }
-
     try {
+      const favoriteExists = await this.getFavoriteForUserByPokemonId(
+        favorite.userId,
+        favorite.pokemonId,
+      );
+
+      if (favoriteExists && favoriteExists.length > 0) {
+        throw new Error("Favorite already exists");
+      }
+
+      if (favoriteExists === null) {
+        throw new Error("Error getting favorite by user and pokemon id");
+      }
+
       return await prisma.favorite.create({
         data: favorite,
       });
@@ -33,6 +37,8 @@ export class FavoritesDb {
       });
     } catch (error) {
       Logger.error(`Error getting favorite by id: ${error}`, "FavoritesDb");
+
+      return null;
     }
   }
 
@@ -74,18 +80,24 @@ export class FavoritesDb {
 
   async deleteFavoriteByPokemonId(pokemonId: number, userId: number) {
     try {
-      await prisma.favorite.deleteMany({
+      const deletedCount = await prisma.favorite.deleteMany({
         where: {
           userId,
           pokemonId,
         },
       });
+
+      if (deletedCount.count === 0) {
+        throw new Error("Favorite not found");
+      }
+
+      return true;
     } catch (error) {
       Logger.error(
         `Error deleting favorite by pokemon id: ${error}`,
         "FavoritesDb",
       );
-      return null;
+      return false;
     }
   }
 }
