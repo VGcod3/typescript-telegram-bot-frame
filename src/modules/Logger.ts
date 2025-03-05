@@ -21,26 +21,31 @@ export class Logger {
       winston.format.json(),
     ),
     defaultMeta: { service: "pokemon-bot" },
-    transports: [
-      // Write all logs with importance level of 'error' or less to 'error.log'
-      new winston.transports.File({
-        filename: "logs/error.log",
-        level: "error",
-        maxsize: 5242880, // 5MB
-        maxFiles: 5,
-      }),
-      // Write all logs with importance level of 'info' or less to 'combined.log'
-      new winston.transports.File({
-        filename: "logs/combined.log",
-        maxsize: 5242880, // 5MB
-        maxFiles: 5,
-      }),
-    ],
+    transports: [], // Start with empty transports array
   });
 
   static {
-    // If we're not in production, log to console with colors
-    if (process.env.NODE_ENV !== "production") {
+    const env = process.env.NODE_ENV;
+
+    if (env === "production") {
+      // Production: Log to files
+      Logger.logger.add(
+        new winston.transports.File({
+          filename: "logs/error.log",
+          level: "error",
+          maxsize: 5242880, // 5MB
+          maxFiles: 5,
+        }),
+      );
+      Logger.logger.add(
+        new winston.transports.File({
+          filename: "logs/combined.log",
+          maxsize: 5242880,
+          maxFiles: 5,
+        }),
+      );
+    } else if (env === "development") {
+      // Development: Only console logging
       Logger.logger.add(
         new winston.transports.Console({
           format: winston.format.combine(
@@ -58,6 +63,7 @@ export class Logger {
         }),
       );
     }
+    // Test environment: No logging
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

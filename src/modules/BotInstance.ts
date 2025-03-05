@@ -1,8 +1,8 @@
 import { TelegramBot } from "typescript-telegram-bot-api";
 import { CommandHandler } from "../commands/CommandHandler";
-import { StartCommand } from "./StartCommand";
 import { MiddlewareManager } from "../middlewares/MiddlewareManager";
 import { rateLimitMiddleware } from "../middlewares/RateLimitter";
+import { StartCommand } from "../commands/StartCommand";
 
 export class BotInstance extends TelegramBot {
   private static instance: TelegramBot;

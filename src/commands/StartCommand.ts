@@ -1,9 +1,9 @@
-import { SessionManager } from "./SessionManager";
-import { Command } from "../commands/Command";
-import { MessageType, Sender } from "./Sender";
+import { SessionManager } from "../modules/SessionManager";
+import { Command } from "./Command";
+import { MessageType, Sender } from "../modules/Sender";
 import { UserDb } from "../db/user.db";
 
-import { SceneNavigator } from "./SceneNavigator";
+import { SceneNavigator } from "../modules/SceneNavigator";
 
 export class StartCommand implements Command {
   public name = "/start";

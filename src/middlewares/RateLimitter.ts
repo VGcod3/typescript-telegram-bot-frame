@@ -25,7 +25,7 @@ class RateLimiter {
 const rateLimiter = new RateLimiter();
 
 export const rateLimitMiddleware: MiddlewareFunction = async (ctx, next) => {
-  const userId = ctx.message.from?.id;
+  const userId = ctx.message?.from?.id;
 
   if (!userId) {
     throw new Error("User ID not found");

@@ -5,7 +5,7 @@ export enum SceneEnum {
   Notifications = "🔔 Notifications",
   Language = "🌐 Language",
   Theme = "🎨 Theme",
-  Pokemon = "🍑 Pokemon",
+  Pokemon = "🎮 Pokemon",
   GeneratePokemon = "✨ Generate pokemon",
   GetAllPokemons = "📋 Get all pokemons",
 }
